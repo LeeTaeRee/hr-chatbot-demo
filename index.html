@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HR AI Assistant</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app-container">
+    <header class="app-header">
+      <div class="header-content">
+        <div class="brand-panel">
+          <div class="brand-mark">HR</div>
+          <div class="brand-copy">
+            <strong class="brand-title">AI HR Assistant</strong>
+            <p class="brand-subtitle">사내 인사규정 및 복리후생 질의응답 서비스</p>
+            <p class="brand-description">직원이 인사규정, 휴가, 복리후생, 전자결재 관련 문의를 자연어로 입력하면 AI가 빠르게 답변을 제공합니다.</p>
+          </div>
+        </div>
+        <button class="btn-new-chat" id="newConversationBtn">새 대화</button>
+      </div>
+    </header>
+
+    <main class="app-main">
+      <aside class="sidebar">
+        <div class="sidebar-section faq-section">
+          <div class="sidebar-title">자주 묻는 질문</div>
+          <div class="faq-grid">
+            <button class="faq-btn" data-question="연차는 언제 발생하나요?">
+              <span>연차는 언제 발생하나요?</span>
+            </button>
+            <button class="faq-btn" data-question="육아휴직 신청 절차는?">
+              <span>육아휴직 신청 절차는?</span>
+            </button>
+            <button class="faq-btn" data-question="전자결재 사용 방법은?">
+              <span>전자결재 사용 방법은?</span>
+            </button>
+            <button class="faq-btn" data-question="직장 내 괴롭힘 신고 절차는?">
+              <span>직장 내 괴롭힘 신고 절차는?</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="sidebar-section history-section">
+          <div class="sidebar-title">최근 질문</div>
+          <div class="history-list" id="historyList">
+            <p class="history-empty">최근 질문이 없습니다</p>
+          </div>
+        </div>
+      </aside>
+
+      <section class="chat-section">
+        <div class="chat-container">
+          <div class="chat-window" id="chatWindow">
+            <div class="chat-history" id="chatHistory">
+              <div class="empty-state" id="emptyState">
+                <p>질문을 입력하거나 FAQ를 선택해 시작하세요.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="input-section">
+            <div class="input-wrapper">
+              <textarea id="userInput" placeholder="질문을 입력하세요..." rows="2"></textarea>
+              <button class="btn-send" id="sendBtn">전송</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="answer-panel">
+          <div class="answer-header">
+            <div>
+              <h3>AI 답변</h3>
+              <p class="answer-tip">해당 답변은 인사팀 업무 지원용으로 제공됩니다.</p>
+            </div>
+          </div>
+          <div class="answer-content">
+            <div class="answer-box" id="aiAnswer">선택한 질문의 답변이 여기에 표시됩니다</div>
+          </div>
+          <div class="answer-actions">
+            <button class="action-btn">관련 규정 보기</button>
+            <button class="action-btn">인사팀 문의</button>
+            <button class="action-btn">전자결재 바로가기</button>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
