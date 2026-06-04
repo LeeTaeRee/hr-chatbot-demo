@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>HR AI Assistant</title>
+  <title>HR 챗봇</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
@@ -13,9 +13,9 @@
         <div class="brand-panel">
           <div class="brand-mark">HR</div>
           <div class="brand-copy">
-            <strong class="brand-title">AI HR Assistant</strong>
-            <p class="brand-subtitle">사내 인사규정 및 복리후생 질의응답 서비스</p>
-            <p class="brand-description">직원이 인사규정, 휴가, 복리후생, 전자결재 관련 문의를 자연어로 입력하면 AI가 빠르게 답변을 제공합니다.</p>
+            <strong class="brand-title">HR 챗봇</strong>
+            <p class="brand-subtitle">고용노동부 표준 취업규칙 기반 질의응답</p>
+            <p class="brand-description">연차, 휴가, 퇴직, 퇴직금, 직장 내 괴롭힘, 근로시간, 휴게시간 관련 질문에 답변합니다.</p>
           </div>
         </div>
         <button class="btn-new-chat" id="newConversationBtn">새 대화</button>
@@ -26,12 +26,9 @@
       <aside class="sidebar">
         <div class="sidebar-section faq-section">
           <div class="sidebar-title">자주 묻는 질문</div>
-          <div class="faq-grid">
-            <button class="faq-btn" data-question="연차는 어떻게 부여되나요?">
-              <span>연차는 어떻게 부여되나요?</span>
-            </button>
-            <button class="faq-btn" data-question="휴게시간 규정은 어떻게 되나요?">
-              <span>휴게시간 규정은 어떻게 되나요?</span>
+          <div class="faq-grid" id="faqGrid">
+            <button class="faq-btn" data-question="연차는 몇 개 발생하나요?">
+              <span>연차는 몇 개 발생하나요?</span>
             </button>
             <button class="faq-btn" data-question="퇴직금은 어떻게 계산되나요?">
               <span>퇴직금은 어떻게 계산되나요?</span>
@@ -39,11 +36,14 @@
             <button class="faq-btn" data-question="직장 내 괴롭힘 신고 절차는?">
               <span>직장 내 괴롭힘 신고 절차는?</span>
             </button>
+            <button class="faq-btn" data-question="육아휴직 사용 조건은?">
+              <span>육아휴직 사용 조건은?</span>
+            </button>
             <button class="faq-btn" data-question="근로시간 기준은 무엇인가요?">
               <span>근로시간 기준은 무엇인가요?</span>
             </button>
-            <button class="faq-btn" data-question="퇴직 절차는 어떻게 되나요?">
-              <span>퇴직 절차는 어떻게 되나요?</span>
+            <button class="faq-btn" data-question="휴게시간 규정은 어떻게 되나요?">
+              <span>휴게시간 규정은 어떻게 되나요?</span>
             </button>
           </div>
         </div>
@@ -78,7 +78,7 @@
           <div class="answer-header">
             <div>
               <h3>AI 답변</h3>
-              <p class="answer-tip">해당 답변은 인사팀 업무 지원용으로 제공됩니다.</p>
+              <p class="answer-tip">고용노동부 표준 취업규칙 기반 답변입니다.</p>
             </div>
           </div>
           <div class="answer-content">
