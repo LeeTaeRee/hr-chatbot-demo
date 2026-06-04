@@ -509,8 +509,6 @@ button, input, textarea {
     max-width: 100%;
   }
 }
-  }
-}
 
 @media (max-width: 1099px) {
   .app-main {

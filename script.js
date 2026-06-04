@@ -11,8 +11,8 @@ const conversations = [];
 
 function highlightKeywords(text) {
   const keywords = [
-    "연차", "휴가", "휴직", "전자결재", "결재선", "신고", "급여", "퇴사",
-    "인트라넷", "신청", "승인", "인사팀", "최대", "1년", "15일"
+    "연차", "휴가", "퇴직", "퇴직금", "근로시간", "휴게시간", "직장 내 괴롭힘", "괴롭힘",
+    "1년", "15일", "30일", "40시간", "52시간", "14일", "유급"
   ];
   
   let result = text;
@@ -72,31 +72,35 @@ function appendMessage(role, text) {
 function generateAiAnswer(question) {
   const normalized = question.trim().toLowerCase();
 
-  if (normalized.includes("연차") || normalized.includes("휴가")) {
-    return "연차는 입사 후 매월 1일씩 발생하며, 1년 차부터 최대 15일의 연차를 사용할 수 있습니다. 휴가 신청은 인트라넷 '휴가/연차 신청' 메뉴에서 간단하게 처리하실 수 있습니다.";
+  if (normalized.includes("퇴직금") || normalized.includes("퇴직 급여") || normalized.includes("퇴직 수당")) {
+    return "표준 취업규칙에 따르면, 퇴직금은 1년 이상 계속 근로한 근로자가 퇴직할 때 평균임금 30일분을 지급합니다. 회사는 퇴직일로부터 14일 이내에 퇴직금을 지급해야 합니다.";
   }
 
-  if (normalized.includes("육아휴직")) {
-    return "육아휴직은 자녀가 만 8세 이하 또는 초등학교 2학년 이하인 경우 신청 가능합니다. 최대 1년까지 사용할 수 있으며, 필요 시 기간 연장이 가능합니다. 신청은 인트라넷 인사 시스템에서 진행해 주세요.";
+  if (normalized.includes("퇴직") || normalized.includes("퇴사") || normalized.includes("사직")) {
+    return "퇴직은 본인의 의사로 퇴직신청서를 제출하고 직속 상사 및 인사팀의 확인을 거쳐 처리됩니다. 표준 취업규칙에서는 최소 2주 전 서면 또는 전자 신청을 권장하며, 퇴직일자와 인수인계를 명확히 해야 합니다.";
   }
 
-  if (normalized.includes("전자결재")) {
-    return "전자결재는 인트라넷 상단 메뉴에서 '전자결재' 항목을 선택해 사용할 수 있습니다. 양식 작성 후 결재선을 추가하고 제출하면 자동으로 담당자에게 전달됩니다.";
+  if (normalized.includes("연차") || normalized.includes("연차휴가") || normalized.includes("년차")) {
+    return "표준 취업규칙에 따르면, 연차 유급휴가는 입사 후 1년간 계속 근로한 자에게 15일을 부여합니다. 1년 미만 근로자는 매월 1일씩 발생하며, 2년차 이후에는 매년 1일씩 추가되어 최대 25일까지 부여될 수 있습니다.";
   }
 
-  if (normalized.includes("괴롭힘") || normalized.includes("직장 내 괴롭힘")) {
-    return "직장 내 괴롭힘 신고는 인트라넷 '인사/윤리' 메뉴에서 온라인 신고서를 작성하거나 인사팀 이메일로 접수할 수 있습니다. 신고 후에는 즉시 보호 조치가 시행됩니다.";
+  if (normalized.includes("휴가") || normalized.includes("휴직") || normalized.includes("휴일")) {
+    return "휴가는 표준 취업규칙에서 연차휴가를 중심으로 규정되며, 연차는 1년간 계속 근로 시 15일 부여됩니다. 연차 사용 시 규정된 절차에 따라 결재를 받고, 사용 예정일을 사전에 알리는 것이 필요합니다.";
   }
 
-  if (normalized.includes("급여") || normalized.includes("월급")) {
-    return "급여 지급일은 매월 말일이며, 세부 내역은 전자명세서에서 확인 가능합니다. 추가 문의는 인사팀으로 문의해 주세요.";
+  if (normalized.includes("근로시간") || normalized.includes("근로 시간") || normalized.includes("근무시간")) {
+    return "표준 취업규칙에서는 1일 8시간, 1주 40시간을 기본 근로시간으로 정합니다. 필요 시 법정 한도 내에서 연장근로를 실시할 수 있으며, 통상 1주 최대 52시간을 초과하지 않아야 합니다.";
   }
 
-  if (normalized.includes("퇴사") || normalized.includes("사직")) {
-    return "퇴사 절차는 퇴사 신청서 작성 후 직속 상사와 인사팀 승인이 필요합니다. 퇴사 요청은 최소 2주 전에 제출해 주세요.";
+  if (normalized.includes("휴게시간") || normalized.includes("휴게")) {
+    return "표준 취업규칙에 따르면, 근로시간이 4시간 이상이면 최소 30분 이상의 휴게시간을 부여하며, 8시간 근로 시에는 최소 1시간의 휴게시간을 제공합니다. 휴게시간은 근로시간에 포함되지 않습니다.";
   }
 
-  return "문의 내용을 확인했습니다. 자세한 안내는 인사팀에 문의하거나 인트라넷 공지를 참고하시기 바랍니다.";
+  if (normalized.includes("괴롭힘") || normalized.includes("직장 내 괴롭힘") || normalized.includes("모욕") || normalized.includes("폭언")) {
+    return "표준 취업규칙에서는 직장 내 괴롭힘을 금지하고 신고 절차와 피해자 보호 조치를 규정합니다. 신고는 회사의 인사팀 또는 상담 창구를 통해 접수하며, 접수 즉시 조사와 필요한 보호 조치를 시행합니다.";
+  }
+
+  return "취업규칙에서 확인되지 않습니다.";
 }
 
 function handleUserQuestion(question) {
