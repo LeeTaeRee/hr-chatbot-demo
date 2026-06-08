@@ -3,90 +3,195 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>HR 챗봇</title>
+  <title>피플허브 HR 업무포털</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <div class="app-container">
-    <header class="app-header">
-      <div class="header-content">
-        <div class="brand-panel">
-          <div class="brand-mark">HR</div>
-          <div class="brand-copy">
-            <strong class="brand-title">HR 챗봇</strong>
-            <p class="brand-subtitle">표준 취업규칙 기반 인사 문의 안내</p>
-            <p class="brand-description">연차, 휴가, 퇴직금, 괴롭힘 신고, 전자결재, 경조휴가, 교육신청 등 실제 업무에 바로 적용 가능한 절차를 제공합니다.</p>
+  <div class="portal-shell">
+    <header class="hero">
+      <nav class="top-nav" aria-label="주요 메뉴">
+        <a class="brand" href="#home" aria-label="피플허브 홈으로 이동">
+          <span class="brand-mark">PH</span>
+          <span>
+            <strong>피플허브</strong>
+            <small>HR 업무포털</small>
+          </span>
+        </a>
+        <div class="nav-links">
+          <a href="#signup">회원가입</a>
+          <a href="#login">로그인</a>
+          <a href="#admin">관리자</a>
+          <a href="#chatbot">HR 챗봇</a>
+          <a href="#policy-search">규정 검색</a>
+        </div>
+      </nav>
+
+      <section class="hero-grid" id="home">
+        <div class="hero-copy">
+          <p class="eyebrow">Employee Experience Platform</p>
+          <h1>사내 HR 업무를 한 곳에서 빠르게 처리하세요.</h1>
+          <p class="hero-description">
+            직원 회원가입, 로그인, 관리자 회원관리, HR 챗봇, 규정 검색을 하나의 웹페이지에서 제공합니다.
+          </p>
+          <div class="hero-actions">
+            <a class="btn btn-primary" href="#signup">직원 등록하기</a>
+            <a class="btn btn-secondary" href="#chatbot">챗봇에 질문하기</a>
           </div>
         </div>
-        <button class="btn-new-chat" id="newConversationBtn">새 대화</button>
-      </div>
+        <div class="hero-card" aria-label="포털 현황 요약">
+          <div class="status-row">
+            <span>오늘 처리 대기</span>
+            <strong>12건</strong>
+          </div>
+          <div class="status-row">
+            <span>규정 업데이트</span>
+            <strong>5건</strong>
+          </div>
+          <div class="status-row success">
+            <span>챗봇 응답률</span>
+            <strong>98%</strong>
+          </div>
+        </div>
+      </section>
     </header>
 
-    <main class="app-main">
-      <aside class="sidebar">
-        <div class="sidebar-section faq-section">
-          <div class="sidebar-title">자주 묻는 질문</div>
-          <div class="faq-grid">
-            <button class="faq-btn" data-question="연차는 몇 개 발생하나요?">
-              <span>연차는 몇 개 발생하나요?</span>
-            </button>
-            <button class="faq-btn" data-question="퇴직금은 어떻게 계산되나요?">
-              <span>퇴직금은 어떻게 계산되나요?</span>
-            </button>
-            <button class="faq-btn" data-question="직장 내 괴롭힘 신고 절차는?">
-              <span>직장 내 괴롭힘 신고 절차는?</span>
-            </button>
-            <button class="faq-btn" data-question="육아휴직 신청하려면 어떻게 하나요?">
-              <span>육아휴직 신청하려면 어떻게 하나요?</span>
-            </button>
-            <button class="faq-btn" data-question="전자결재는 어떻게 하나요?">
-              <span>전자결재는 어떻게 하나요?</span>
-            </button>
-            <button class="faq-btn" data-question="경조휴가 신청 절차는?">
-              <span>경조휴가 신청 절차는?</span>
-            </button>
+    <main class="main-content">
+      <section class="section-panel account-grid" aria-label="직원 계정 관리">
+        <article class="card" id="signup">
+          <div class="section-heading">
+            <p class="eyebrow">Employee Sign-up</p>
+            <h2>직원 회원가입</h2>
+            <p>사번과 회사 이메일로 직원 계정을 등록합니다.</p>
           </div>
-        </div>
+          <form id="signupForm" class="form-stack">
+            <label>
+              이름
+              <input type="text" id="signupName" placeholder="홍길동" required />
+            </label>
+            <label>
+              사번
+              <input type="text" id="signupEmployeeId" placeholder="EMP-2026-001" required />
+            </label>
+            <label>
+              부서
+              <select id="signupDepartment" required>
+                <option value="">부서를 선택하세요</option>
+                <option>인사팀</option>
+                <option>재무팀</option>
+                <option>개발팀</option>
+                <option>영업팀</option>
+                <option>마케팅팀</option>
+              </select>
+            </label>
+            <label>
+              회사 이메일
+              <input type="email" id="signupEmail" placeholder="name@company.com" required />
+            </label>
+            <label>
+              비밀번호
+              <input type="password" id="signupPassword" placeholder="8자 이상 입력" minlength="8" required />
+            </label>
+            <button class="btn btn-primary" type="submit">회원가입 완료</button>
+          </form>
+          <p class="form-message" id="signupMessage" aria-live="polite"></p>
+        </article>
 
-        <div class="sidebar-section history-section">
-          <div class="sidebar-title">최근 질문</div>
-          <div class="history-list" id="historyList">
-            <p class="history-empty">최근 질문이 없습니다</p>
+        <article class="card" id="login">
+          <div class="section-heading">
+            <p class="eyebrow">Employee Login</p>
+            <h2>직원 로그인</h2>
+            <p>등록된 회사 이메일과 비밀번호로 로그인합니다.</p>
           </div>
-        </div>
-      </aside>
+          <form id="loginForm" class="form-stack">
+            <label>
+              회사 이메일
+              <input type="email" id="loginEmail" placeholder="name@company.com" required />
+            </label>
+            <label>
+              비밀번호
+              <input type="password" id="loginPassword" placeholder="비밀번호" required />
+            </label>
+            <button class="btn btn-primary" type="submit">로그인</button>
+          </form>
+          <div class="login-state" id="loginState">
+            <span class="dot"></span>
+            <p>로그인 전입니다.</p>
+          </div>
+        </article>
+      </section>
 
-      <section class="chat-section">
-        <div class="chat-container">
-          <div class="chat-window" id="chatWindow">
-            <div class="chat-history" id="chatHistory">
-              <div class="empty-state" id="emptyState">
-                <p>질문을 입력하거나 FAQ를 선택해 시작하세요.</p>
-              </div>
+      <section class="section-panel admin-panel" id="admin">
+        <div class="section-heading">
+          <p class="eyebrow">Admin Console</p>
+          <h2>관리자 회원관리</h2>
+          <p>직원 계정의 상태를 확인하고 승인, 비활성화, 삭제를 처리합니다.</p>
+        </div>
+        <div class="admin-toolbar">
+          <input type="search" id="memberSearch" placeholder="이름, 사번, 부서, 이메일 검색" aria-label="회원 검색" />
+          <button class="btn btn-secondary" id="resetMembersBtn" type="button">샘플 데이터 복원</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>이름</th>
+                <th>사번</th>
+                <th>부서</th>
+                <th>이메일</th>
+                <th>상태</th>
+                <th>관리</th>
+              </tr>
+            </thead>
+            <tbody id="memberTableBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="section-panel workspace-grid">
+        <article class="card chatbot-card" id="chatbot">
+          <div class="section-heading">
+            <p class="eyebrow">HR Chatbot</p>
+            <h2>HR 챗봇</h2>
+            <p>연차, 휴가, 급여, 복리후생 등 HR 질문에 즉시 답변합니다.</p>
+          </div>
+          <div class="quick-questions" aria-label="추천 질문">
+            <button type="button" data-question="연차는 어떻게 신청하나요?">연차 신청</button>
+            <button type="button" data-question="육아휴직 절차를 알려주세요.">육아휴직</button>
+            <button type="button" data-question="퇴직금은 어떻게 계산하나요?">퇴직금</button>
+            <button type="button" data-question="직장 내 괴롭힘 신고 방법은?">신고 절차</button>
+          </div>
+          <div class="chat-window" id="chatWindow" aria-live="polite">
+            <div class="message bot">
+              <strong>HR 봇</strong>
+              <p>안녕하세요. HR 제도와 업무 절차를 질문해 주세요.</p>
             </div>
           </div>
+          <form id="chatForm" class="chat-input">
+            <input type="text" id="chatInput" placeholder="예: 연차는 어떻게 신청하나요?" required />
+            <button class="btn btn-primary" type="submit">전송</button>
+          </form>
+        </article>
 
-          <div class="input-section">
-            <div class="input-wrapper">
-              <textarea id="userInput" placeholder="질문을 입력하세요..." rows="2"></textarea>
-              <button class="btn-send" id="sendBtn">전송</button>
-            </div>
+        <article class="card" id="policy-search">
+          <div class="section-heading">
+            <p class="eyebrow">Policy Finder</p>
+            <h2>규정 검색</h2>
+            <p>키워드를 입력해 사내 규정 요약과 담당 부서를 확인합니다.</p>
           </div>
-        </div>
-
-        <div class="answer-panel">
-          <div class="answer-header">
-            <div>
-              <h3>AI 답변</h3>
-              <p class="answer-tip">단계별 절차, 준비 서류, 담당 부서까지 한 번에 확인하세요.</p>
-            </div>
+          <form id="policySearchForm" class="search-box">
+            <input type="search" id="policyInput" placeholder="예: 연차, 재택근무, 경조휴가" required />
+            <button class="btn btn-primary" type="submit">검색</button>
+          </form>
+          <div class="policy-tags" aria-label="인기 규정 키워드">
+            <button type="button" data-policy="연차">연차</button>
+            <button type="button" data-policy="재택근무">재택근무</button>
+            <button type="button" data-policy="경조휴가">경조휴가</button>
+            <button type="button" data-policy="교육">교육</button>
           </div>
-          <div class="answer-content" id="aiAnswer">
-            <div class="answer-card empty-card" id="emptyAnswerCard">
-              <p>질문을 입력하거나 FAQ를 선택하면 표준 취업규칙 기반 답변이 카드 형태로 표시됩니다.</p>
-            </div>
+          <div class="policy-results" id="policyResults">
+            <p class="empty-result">검색어를 입력하면 규정 결과가 표시됩니다.</p>
           </div>
-        </div>
+        </article>
       </section>
     </main>
   </div>
