@@ -1,335 +1,358 @@
-const userInput = document.getElementById("userInput");
-const sendBtn = document.getElementById("sendBtn");
-const chatHistory = document.getElementById("chatHistory");
-const aiAnswer = document.getElementById("aiAnswer");
-const emptyState = document.getElementById("emptyState");
-const historyList = document.getElementById("historyList");
-const faqButtons = document.querySelectorAll(".faq-btn");
-const newConversationBtn = document.getElementById("newConversationBtn");
-
-const conversations = [];
-
-const answerBank = [
-  {
-    keywords: ["연차", "연차휴가", "연차 몇 개", "연차 개수", "연차 발생", "연차 발생 기준", "연차 기준", "년차"],
-    answer: {
-      title: "연차 유급휴가 발생 기준",
-      description: "연차 유급휴가는 입사 후 1년간 계속 근로한 직원에게 15일이 부여됩니다. 1년 미만 근로자는 매월 1일씩 연차가 발생하며, 2년차 이후에는 매년 1일씩 추가되어 최대 25일까지 부여됩니다.",
-      steps: [
-        "인사 시스템에 로그인",
-        "내 연차 현황 확인",
-        "연차 사용 계획 수립",
-        "연차 신청서 제출 및 승인 요청"
-      ],
-      documents: ["연차 신청서", "연차 사용 계획서"],
-      department: "인사팀",
-      notes: "연차는 연 단위로 산정되며, 미사용 연차는 회사 취업규칙에 따라 이월 또는 보상될 수 있습니다."
-    }
-  },
-  {
-    keywords: ["퇴직금", "퇴직금 계산", "퇴직금 얼마", "퇴직급여", "퇴직수당"],
-    answer: {
-      title: "퇴직금 계산 기준",
-      description: "퇴직금은 1년 이상 계속 근로한 근로자가 퇴직할 때 평균임금 30일분을 지급받는 제도입니다. 퇴직일을 기준으로 평균임금을 산정하여 지급합니다.",
-      steps: [
-        "퇴직 의사 확인 및 직속 상사에 통보",
-        "퇴직 신청서 제출",
-        "인사팀 퇴직금 산정 요청",
-        "퇴직금 지급일 확인 및 수령"
-      ],
-      documents: ["퇴직 신청서", "재직 및 기여 증빙 서류"],
-      department: "인사팀",
-      notes: "퇴직금은 퇴직일로부터 14일 이내 지급되어야 합니다. 계약직이나 수습 기간 중인 경우 규정이 다를 수 있습니다."
-    }
-  },
-  {
-    keywords: ["직장 내 괴롭힘", "괴롭힘", "괴롭힘 신고", "괴롭힘 신고 절차", "직장괴롭힘"],
-    answer: {
-      title: "직장 내 괴롭힘 신고 절차",
-      description: "직장 내 괴롭힘은 회사 취업규칙에서 금지되며, 피해자는 안전하게 신고할 수 있는 절차가 마련되어 있습니다.",
-      steps: [
-        "괴롭힘 사례를 문서로 정리",
-        "내부 신고 채널 접속",
-        "괴롭힘 신고서 작성 및 제출",
-        "인사팀 또는 윤리위원회 상담 요청"
-      ],
-      documents: ["괴롭힘 신고서", "증빙 자료(메시지, 녹음 등)"],
-      department: "인사팀 / 윤리위원회",
-      notes: "신고자는 신고 이후 불이익을 받지 않으며, 회사는 신고 접수 후 즉시 조사 및 보호 조치를 시행해야 합니다."
-    }
-  },
-  {
-    keywords: ["육아휴직", "육아 휴직", "육아휴직 신청", "육아휴직 조건", "육아휴직 사용", "육아휴직 언제"],
-    answer: {
-      title: "육아휴직 신청 절차",
-      description: "육아휴직은 자녀가 만 8세 이하 또는 초등학교 2학년 이하인 근로자가 사용할 수 있으며, 기본적으로 최대 1년까지 사용할 수 있습니다.",
-      steps: [
-        "인사 시스템 접속",
-        "육아휴직 신청서 작성",
-        "가족관계증명서 등 증빙서류 첨부",
-        "팀장 승인 요청",
-        "인사팀 최종 승인"
-      ],
-      documents: ["육아휴직 신청서", "가족관계증명서", "자녀 주민등록등본"],
-      department: "인사팀",
-      notes: "휴직 시작 최소 30일 전 신청하는 것이 원칙이며, 사내 규정에 따라 추가 서류가 필요할 수 있습니다."
-    }
-  },
-  {
-    keywords: ["전자결재", "전자 결재", "결재", "전자결재 사용", "결재 시스템"],
-    answer: {
-      title: "전자결재 이용 안내",
-      description: "전자결재는 회사 인트라넷을 통해 문서 결재를 처리하는 표준 절차입니다. 결재선 설정과 내용 입력 후 제출하면 자동으로 다음 결재자에게 전달됩니다.",
-      steps: [
-        "인트라넷 로그인",
-        "전자결재 메뉴 진입",
-        "결재 문서 양식 선택",
-        "결재선 추가 및 내용 입력",
-        "제출 및 승인 대기"
-      ],
-      documents: ["결재 요청서", "첨부 문서(예: 보고서, 견적서)"],
-      department: "인사팀 / 각 부서 결재자",
-      notes: "결재 요청 전에 관련 부서와 사전 협의를 완료하면 승인 속도가 빨라집니다."
-    }
-  },
-  {
-    keywords: ["경조휴가", "경조", "결혼휴가", "장례휴가", "산휴", "가족 경사"],
-    answer: {
-      title: "경조휴가 신청 안내",
-      description: "경조휴가는 본인 또는 가족의 경조사 발생 시 회사 규정에 따라 부여되는 휴가입니다. 신청 방식과 허용 일수는 취업규칙에 따라 정해집니다.",
-      steps: [
-        "경조사 발생 사실 확인",
-        "경조휴가 신청서 작성",
-        "경조사 관련 증빙서류 첨부",
-        "팀장 승인 요청",
-        "인사팀 최종 승인"
-      ],
-      documents: ["경조휴가 신청서", "가족관계증명서", "결혼식 초대장 또는 장례식 영수증"],
-      department: "인사팀",
-      notes: "경조휴가 신청은 가능한 한 사전 통보해야 하며, 긴급한 경우 사후 제출도 가능합니다."
-    }
-  },
-  {
-    keywords: ["교육신청", "교육 신청", "사내 교육", "교육 프로그램"],
-    answer: {
-      title: "교육 신청 절차",
-      description: "사내 교육은 회사에서 제공하는 직무 및 역량 강화 프로그램으로, 사전에 신청 후 승인 절차를 거쳐 참여할 수 있습니다.",
-      steps: [
-        "교육 포털 접속",
-        "참여 희망 교육 선택",
-        "교육 신청서 제출",
-        "팀장 승인 요청",
-        "교육 담당 부서 확인 및 일정 확정"
-      ],
-      documents: ["교육 신청서", "교육 계획서(필요 시)"],
-      department: "인사팀 / 교육 담당 부서",
-      notes: "교육 일정은 부서 운영 상황에 따라 조정될 수 있으므로 신청 후 반드시 확정 일정을 확인하세요."
-    }
-  },
-  {
-    keywords: ["복리후생", "복지", "복리후생 신청", "사내 복지", "福利厚生"],
-    answer: {
-      title: "복리후생 안내",
-      description: "복리후생은 직원의 생활 안정과 만족도를 높이기 위해 제공되는 제도로, 식대, 교통비, 건강지원, 휴가 혜택 등이 포함됩니다.",
-      steps: [
-        "복리후생 안내 페이지 확인",
-        "해당 프로그램 신청 조건 확인",
-        "복리후생 신청서 작성",
-        "관련 증빙서류 첨부",
-        "인사팀 승인 요청"
-      ],
-      documents: ["복리후생 신청서", "관련 증빙서류"],
-      department: "인사팀",
-      notes: "프로그램별 신청 기간과 자격 요건이 다르므로 사전에 안내 자료를 꼼꼼히 확인하세요."
-    }
-  },
-  {
-    keywords: ["휴게시간", "휴게 시간", "점심시간", "휴게시간 몇 분", "점심시간 몇 분", "식사시간"],
-    answer: {
-      title: "휴게시간 기준 안내",
-      description: "휴게시간은 근로 중 휴식을 보장하기 위한 제도입니다. 4시간 이상 근로 시 최소 30분, 8시간 이상 근로 시 최소 1시간의 휴게시간을 부여해야 합니다.",
-      steps: [
-        "근무 일정 확인",
-        "휴게시간 계획 수립",
-        "팀장과 휴게시간 조율",
-        "지정된 시간에 휴게시간 확보"
-      ],
-      documents: ["휴게시간 신청서(필요 시)"],
-      department: "인사팀 / 해당 부서 관리자",
-      notes: "휴게시간은 근로시간에 포함되지 않으며, 지정된 시간에 반드시 휴식을 취해야 합니다."
-    }
-  }
+const demoUsers = [
+  { name: "관리자", email: "admin@shinsung.co.kr", password: "admin1234", department: "인사팀", role: "관리자", approved: true },
+  { name: "김민수", email: "minsu@shinsung.co.kr", password: "user1234", department: "개발팀", role: "임직원", approved: true }
 ];
 
-const fallbackAnswer = {
-  title: "취업규칙에서 확인되지 않습니다.",
-  description: "입력하신 내용은 현재 사내 취업규칙에 명시되어 있지 않습니다. 인사팀에 문의하여 정확한 규정과 절차를 확인하세요.",
-  steps: ["인사팀 문의", "관련 규정 확인 요청", "승인 여부 확인"],
-  documents: ["문의 내용 요약"],
-  department: "인사팀",
-  notes: "규정은 회사별로 다를 수 있으므로 반드시 실제 취업규칙을 확인해야 합니다."
-};
+let currentUser = null;
+let users = [...demoUsers];
+let approvals = [
+  { id: crypto.randomUUID(), type: "회원가입", name: "오지훈", content: "영업팀 / jihun@shinsung.co.kr", status: "pending" },
+  { id: crypto.randomUUID(), type: "휴가", name: "김민수", content: "연차 2026-06-15 ~ 2026-06-15", status: "pending" }
+];
+let leaveRequests = [];
+let attendanceLogs = [];
 
-function normalizeText(text) {
-  return text
-    .trim()
-    .toLowerCase()
-    .replace(/[\u2000-\u206F\u2E00-\u2E7F\u3000-\u303F\p{P}]/gu, "")
-    .replace(/\s+/g, " ");
+const notices = [
+  { title: "2026년 하계 집중휴가 운영 안내", body: "7월 27일부터 8월 7일까지 부서별 집중휴가 일정을 등록해 주세요.", date: "2026.06.09" },
+  { title: "상반기 성과면담 입력 마감", body: "팀장은 6월 21일까지 구성원 면담 결과를 HR 시스템에 입력해야 합니다.", date: "2026.06.07" },
+  { title: "사내 보안 캠페인", body: "비밀번호 변경 및 2단계 인증 점검을 완료해 주세요.", date: "2026.06.05" },
+  { title: "건강검진 예약 오픈", body: "임직원 건강검진 예약 페이지가 오픈되었습니다.", date: "2026.06.01" }
+];
+
+const $ = (selector) => document.querySelector(selector);
+const $$ = (selector) => [...document.querySelectorAll(selector)];
+
+const todayLabel = $("#todayLabel");
+const clockLabel = $("#clockLabel");
+const userPanel = $("#userPanel");
+const userNameLabel = $("#userNameLabel");
+const userRoleLabel = $("#userRoleLabel");
+const logoutBtn = $("#logoutBtn");
+const loginForm = $("#loginForm");
+const signupForm = $("#signupForm");
+const loginMessage = $("#loginMessage");
+const signupMessage = $("#signupMessage");
+const approvalTable = $("#approvalTable");
+const pendingCount = $("#pendingCount");
+const attendanceCount = $("#attendanceCount");
+const noticeList = $("#noticeList");
+const leaveForm = $("#leaveForm");
+const leaveFeed = $("#leaveFeed");
+const attendanceLog = $("#attendanceLog");
+const chatWindow = $("#chatWindow");
+
+function formatDate(date = new Date()) {
+  return new Intl.DateTimeFormat("ko-KR", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    weekday: "long"
+  }).format(date);
 }
 
-function includesAny(text, keywords) {
-  return keywords.some((keyword) => text.includes(keyword));
+function formatTime(date = new Date()) {
+  return new Intl.DateTimeFormat("ko-KR", {
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false
+  }).format(date);
 }
 
-function findAnswer(question) {
-  const normalized = normalizeText(question);
-
-  for (const entry of answerBank) {
-    if (includesAny(normalized, entry.keywords)) {
-      return entry.answer;
-    }
-  }
-
-  return fallbackAnswer;
+function setMessage(element, text, type = "") {
+  element.textContent = text;
+  element.className = `form-message ${type}`.trim();
 }
 
-function renderAnswerCard(answer) {
-  const stepsMarkup = answer.steps
-    .map((step, index) => `<li><strong>${index + 1}.</strong> ${step}</li>`)
-    .join("");
-
-  const documentsMarkup = answer.documents.length
-    ? `<ul class="answer-list">${answer.documents.map((doc) => `<li>${doc}</li>`).join("")}</ul>`
-    : `<p>별도 서류가 필요하지 않습니다.</p>`;
-
-  return `
-    <div class="answer-card">
-      <div class="answer-card-header">
-        <span class="answer-badge">안내</span>
-        <h4>${answer.title}</h4>
-        <p>${answer.description}</p>
-      </div>
-
-      <div class="answer-section">
-        <h5>진행 절차</h5>
-        <ol class="answer-list steps-list">
-          ${stepsMarkup}
-        </ol>
-      </div>
-
-      <div class="answer-section grid-section">
-        <div>
-          <h5>준비 서류</h5>
-          ${documentsMarkup}
-        </div>
-        <div>
-          <h5>담당 부서</h5>
-          <p>${answer.department}</p>
-        </div>
-      </div>
-
-      <div class="answer-section">
-        <h5>주의사항</h5>
-        <p>${answer.notes}</p>
-      </div>
-    </div>
-  `;
-}
-
-function renderHistory() {
-  if (!historyList) return;
-
-  historyList.innerHTML = "";
-
-  if (conversations.length === 0) {
-    historyList.innerHTML = `<p class="history-empty">최근 질문이 없습니다</p>`;
+function updateUserPanel() {
+  if (!currentUser) {
+    userPanel.querySelector(".user-avatar").textContent = "게";
+    userNameLabel.textContent = "게스트";
+    userRoleLabel.textContent = "로그인이 필요합니다";
+    logoutBtn.hidden = true;
     return;
   }
 
-  conversations.slice().reverse().forEach((entry) => {
-    const item = document.createElement("button");
-    item.className = "history-item";
-    item.type = "button";
-    item.innerHTML = `
-      <span>최근 질문</span>
-      <strong>${entry.question}</strong>
-    `;
-    item.addEventListener("click", () => {
-      handleUserQuestion(entry.question);
-    });
-    historyList.appendChild(item);
-  });
+  userPanel.querySelector(".user-avatar").textContent = currentUser.name.slice(0, 1);
+  userNameLabel.textContent = currentUser.name;
+  userRoleLabel.textContent = `${currentUser.department} · ${currentUser.role}`;
+  logoutBtn.hidden = false;
 }
 
-function appendMessage(role, text) {
-  if (emptyState) {
-    emptyState.style.display = "none";
+function updateMetrics() {
+  pendingCount.textContent = approvals.filter((item) => item.status === "pending").length;
+  attendanceCount.textContent = new Set(attendanceLogs.filter((log) => log.action === "출근").map((log) => log.name)).size;
+}
+
+function statusBadge(status) {
+  const label = status === "approved" ? "승인" : status === "rejected" ? "반려" : "대기";
+  const className = status === "approved" ? "approved" : status === "rejected" ? "rejected" : "pending";
+  return `<span class="badge ${className}">${label}</span>`;
+}
+
+function renderApprovals() {
+  if (!approvals.length) {
+    approvalTable.innerHTML = `<tr><td colspan="5">승인 요청이 없습니다.</td></tr>`;
+    updateMetrics();
+    return;
   }
 
-  const messageEl = document.createElement("div");
-  messageEl.className = `chat-message ${role}`;
-  const avatar = role === "user" ? "직" : "AI";
-  const title = role === "user" ? "직원" : "AI 챗봇";
-
-  messageEl.innerHTML = `
-    <div class="message-avatar">${avatar}</div>
-    <div class="message-body">
-      <span class="message-title">${title}</span>
-      <div class="message-bubble"><p>${text}</p></div>
-    </div>
-  `;
-
-  chatHistory.appendChild(messageEl);
-  chatHistory.scrollTop = chatHistory.scrollHeight;
+  approvalTable.innerHTML = approvals.map((item) => `
+    <tr>
+      <td>${item.type}</td>
+      <td>${item.name}</td>
+      <td>${item.content}</td>
+      <td>${statusBadge(item.status)}</td>
+      <td>
+        <div class="action-row">
+          <button type="button" class="approve" data-approval="${item.id}" data-status="approved">승인</button>
+          <button type="button" class="reject" data-approval="${item.id}" data-status="rejected">반려</button>
+        </div>
+      </td>
+    </tr>
+  `).join("");
+  updateMetrics();
 }
 
-function handleUserQuestion(question) {
+function renderNotices() {
+  noticeList.innerHTML = notices.map((notice) => `
+    <article class="notice-item">
+      <div>
+        <h3>${notice.title}</h3>
+        <p>${notice.body}</p>
+      </div>
+      <span class="notice-date">${notice.date}</span>
+    </article>
+  `).join("");
+}
+
+function renderLeaveFeed() {
+  if (!leaveRequests.length) {
+    leaveFeed.innerHTML = `<article class="feed-item"><p>아직 등록된 휴가 신청이 없습니다.</p></article>`;
+    return;
+  }
+
+  leaveFeed.innerHTML = leaveRequests.map((request) => `
+    <article class="feed-item">
+      <div>
+        <h3>${request.type} · ${request.name}</h3>
+        <p>${request.start} ~ ${request.end} / ${request.reason}</p>
+      </div>
+      ${statusBadge(request.status)}
+    </article>
+  `).join("");
+}
+
+function renderAttendance() {
+  if (!attendanceLogs.length) {
+    attendanceLog.innerHTML = `<article class="log-item"><p>오늘의 근태 기록이 없습니다.</p></article>`;
+    updateMetrics();
+    return;
+  }
+
+  attendanceLog.innerHTML = attendanceLogs.map((log) => `
+    <article class="log-item">
+      <div>
+        <strong>${log.name} · ${log.action}</strong>
+        <p>${log.department}</p>
+      </div>
+      <span class="log-time">${log.time}</span>
+    </article>
+  `).join("");
+  updateMetrics();
+}
+
+function showSection(sectionId) {
+  $$(".content-section").forEach((section) => section.classList.toggle("active", section.id === sectionId));
+  $$(".nav-link").forEach((link) => link.classList.toggle("active", link.dataset.section === sectionId));
+}
+
+function addApproval(type, name, content) {
+  approvals.unshift({ id: crypto.randomUUID(), type, name, content, status: "pending" });
+  renderApprovals();
+}
+
+function requireLogin() {
+  if (currentUser) return true;
+  alert("로그인 후 이용할 수 있습니다.");
+  document.getElementById("authSection").scrollIntoView({ behavior: "smooth" });
+  return false;
+}
+
+function addChatMessage(text, sender) {
+  const message = document.createElement("div");
+  message.className = `${sender}-message message`;
+  message.textContent = text;
+  chatWindow.appendChild(message);
+  chatWindow.scrollTop = chatWindow.scrollHeight;
+}
+
+function createBotAnswer(question) {
+  const normalized = question.replace(/\s/g, "");
+  if (/휴가|연차|반차|병가/.test(normalized)) {
+    return "휴가신청 메뉴에서 종류, 시작일, 종료일, 사유를 입력하면 관리자 승인 목록에 자동 등록됩니다. 승인 상태는 휴가신청 영역에서 확인할 수 있습니다.";
+  }
+  if (/근태|출근|퇴근|체크/.test(normalized)) {
+    return "근태관리 메뉴에서 출근 체크와 퇴근 체크를 누르면 현재 시각 기준으로 기록됩니다. 대시보드의 금일 출근 지표도 함께 갱신됩니다.";
+  }
+  if (/회원|가입|승인|관리자/.test(normalized)) {
+    return "회원가입 요청은 관리자 승인 화면에 대기 상태로 등록됩니다. 관리자가 승인하면 계정이 활성화되고, 반려 시 로그인이 제한됩니다.";
+  }
+  if (/공지|안내/.test(normalized)) {
+    return "공지사항 메뉴에서 이번 주 중요 HR 안내를 확인할 수 있습니다. 데모에서는 공지 등록 버튼으로 샘플 공지도 추가할 수 있습니다.";
+  }
+  if (/조직|부서|담당/.test(normalized)) {
+    return "조직도 메뉴에서 대표이사와 인사팀, 경영지원팀, 영업팀, 개발팀, 생산관리팀 담당자를 확인할 수 있습니다.";
+  }
+  return "문의하신 내용은 HR 담당자가 확인할 수 있도록 인사팀(hr@shinsung.co.kr)에 접수해 주세요. 휴가, 근태, 승인, 공지, 조직도 관련 질문은 제가 즉시 안내할 수 있습니다.";
+}
+
+loginForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+  const email = $("#loginEmail").value.trim();
+  const password = $("#loginPassword").value;
+  const user = users.find((item) => item.email === email && item.password === password);
+
+  if (!user) {
+    setMessage(loginMessage, "이메일 또는 비밀번호를 확인해 주세요.", "error");
+    return;
+  }
+  if (!user.approved) {
+    setMessage(loginMessage, "관리자 승인 대기 중인 계정입니다.", "error");
+    return;
+  }
+
+  currentUser = user;
+  updateUserPanel();
+  setMessage(loginMessage, `${user.name}님, 환영합니다.`, "success");
+});
+
+signupForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+  const name = $("#signupName").value.trim();
+  const department = $("#signupDept").value;
+  const email = $("#signupEmail").value.trim();
+  const password = $("#signupPassword").value;
+
+  if (users.some((user) => user.email === email)) {
+    setMessage(signupMessage, "이미 등록된 이메일입니다.", "error");
+    return;
+  }
+
+  users.push({ name, email, password, department, role: "임직원", approved: false });
+  addApproval("회원가입", name, `${department} / ${email}`);
+  signupForm.reset();
+  setMessage(signupMessage, "가입 요청이 등록되었습니다. 관리자 승인 후 로그인할 수 있습니다.", "success");
+});
+
+approvalTable.addEventListener("click", (event) => {
+  const button = event.target.closest("button[data-approval]");
+  if (!button) return;
+
+  const request = approvals.find((item) => item.id === button.dataset.approval);
+  if (!request) return;
+
+  request.status = button.dataset.status;
+  if (request.type === "회원가입" && request.status === "approved") {
+    const email = request.content.split("/").pop().trim();
+    const user = users.find((item) => item.email === email);
+    if (user) user.approved = true;
+  }
+  renderApprovals();
+  renderLeaveFeed();
+});
+
+logoutBtn.addEventListener("click", () => {
+  currentUser = null;
+  updateUserPanel();
+  setMessage(loginMessage, "로그아웃되었습니다.", "success");
+});
+
+leaveForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+  if (!requireLogin()) return;
+
+  const request = {
+    type: $("#leaveType").value,
+    start: $("#leaveStart").value,
+    end: $("#leaveEnd").value,
+    reason: $("#leaveReason").value,
+    name: currentUser.name,
+    status: "pending"
+  };
+  leaveRequests.unshift(request);
+  addApproval("휴가", request.name, `${request.type} ${request.start} ~ ${request.end}`);
+  leaveForm.reset();
+  renderLeaveFeed();
+});
+
+function recordAttendance(action) {
+  if (!requireLogin()) return;
+  attendanceLogs.unshift({
+    name: currentUser.name,
+    department: currentUser.department,
+    action,
+    time: formatTime()
+  });
+  renderAttendance();
+}
+
+$("#checkInBtn").addEventListener("click", () => recordAttendance("출근"));
+$("#checkOutBtn").addEventListener("click", () => recordAttendance("퇴근"));
+
+$("#chatForm").addEventListener("submit", (event) => {
+  event.preventDefault();
+  const input = $("#chatInput");
+  const question = input.value.trim();
   if (!question) return;
 
-  appendMessage("user", question);
-  const answer = findAnswer(question);
-  appendMessage("ai", answer.title);
-  aiAnswer.innerHTML = renderAnswerCard(answer);
-
-  conversations.push({ question, answer: answer.title, timestamp: new Date().toISOString() });
-  renderHistory();
-}
-
-function handleSend() {
-  const text = userInput.value.trim();
-  if (!text) return;
-
-  handleUserQuestion(text);
-  userInput.value = "";
-  userInput.focus();
-}
-
-function startNewConversation() {
-  if (chatHistory) chatHistory.innerHTML = "";
-  if (emptyState) emptyState.style.display = "flex";
-  if (aiAnswer) aiAnswer.innerHTML = `<div class="answer-card empty-card"><p>질문을 입력하거나 FAQ를 선택하면 표준 취업규칙 기반 답변이 카드 형태로 표시됩니다.</p></div>`;
-  conversations.length = 0;
-  renderHistory();
-}
-
-sendBtn.addEventListener("click", handleSend);
-userInput.addEventListener("keydown", (event) => {
-  if (event.key === "Enter" && !event.shiftKey) {
-    event.preventDefault();
-    handleSend();
-  }
+  addChatMessage(question, "user");
+  input.value = "";
+  window.setTimeout(() => addChatMessage(createBotAnswer(question), "bot"), 250);
 });
 
-faqButtons.forEach((button) => {
+$$(".suggestions button").forEach((button) => {
   button.addEventListener("click", () => {
-    const question = button.getAttribute("data-question");
-    if (question) handleUserQuestion(question);
+    $("#chatInput").value = button.dataset.question;
+    $("#chatForm").requestSubmit();
   });
 });
 
-if (newConversationBtn) {
-  newConversationBtn.addEventListener("click", startNewConversation);
+$$(".nav-link").forEach((link) => {
+  link.addEventListener("click", (event) => {
+    event.preventDefault();
+    showSection(link.dataset.section);
+  });
+});
+
+$$("[data-scroll]").forEach((button) => {
+  button.addEventListener("click", () => showSection(button.dataset.scroll));
+});
+
+$("#seedRequestBtn").addEventListener("click", () => {
+  addApproval("회원가입", "문서윤", "경영지원팀 / seoyun@shinsung.co.kr");
+});
+
+$("#noticeAddBtn").addEventListener("click", () => {
+  notices.unshift({
+    title: "신규 HR 포털 베타 오픈",
+    body: "로그인, 휴가신청, 근태관리, AI 챗봇 기능을 시범 운영합니다.",
+    date: new Date().toISOString().slice(0, 10).replaceAll("-", ".")
+  });
+  renderNotices();
+});
+
+function init() {
+  todayLabel.textContent = formatDate();
+  setInterval(() => {
+    clockLabel.textContent = formatTime();
+  }, 1000);
+  clockLabel.textContent = formatTime();
+  updateUserPanel();
+  renderApprovals();
+  renderNotices();
+  renderLeaveFeed();
+  renderAttendance();
 }
 
-renderHistory();
+init();
