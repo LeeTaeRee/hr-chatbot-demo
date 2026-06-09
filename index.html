@@ -3,88 +3,263 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>HR 챗봇</title>
-  <link rel="stylesheet" href="styles.css" />
+  <title>신성 HR 인트라넷 포털</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="app-container">
-    <header class="app-header">
-      <div class="header-content">
-        <div class="brand-panel">
-          <div class="brand-mark">HR</div>
-          <div class="brand-copy">
-            <strong class="brand-title">HR 챗봇</strong>
-            <p class="brand-subtitle">표준 취업규칙 기반 인사 문의 안내</p>
-            <p class="brand-description">연차, 휴가, 퇴직금, 괴롭힘 신고, 전자결재, 경조휴가, 교육신청 등 실제 업무에 바로 적용 가능한 절차를 제공합니다.</p>
-          </div>
-        </div>
-        <button class="btn-new-chat" id="newConversationBtn">새 대화</button>
+  <div class="portal-shell">
+    <aside class="sidebar" aria-label="신성 HR 인트라넷 메뉴">
+      <a class="brand" href="#home" aria-label="신성 HR 홈">
+        <span class="brand-mark">SS</span>
+        <span>
+          <strong>신성 HR</strong>
+          <small>Intranet Portal</small>
+        </span>
+      </a>
+
+      <nav class="nav-menu" aria-label="주요 메뉴">
+        <a href="#home" class="nav-link active" data-section="home">대시보드</a>
+        <a href="#approval" class="nav-link" data-section="approval">관리자 승인</a>
+        <a href="#org" class="nav-link" data-section="org">조직도</a>
+        <a href="#notice" class="nav-link" data-section="notice">공지사항</a>
+        <a href="#leave" class="nav-link" data-section="leave">휴가신청</a>
+        <a href="#attendance" class="nav-link" data-section="attendance">근태관리</a>
+        <a href="#chatbot" class="nav-link" data-section="chatbot">AI 챗봇</a>
+      </nav>
+
+      <div class="sidebar-card">
+        <span class="status-dot"></span>
+        <p>인사 시스템 정상 운영 중</p>
+        <strong id="todayLabel">-</strong>
       </div>
-    </header>
+    </aside>
 
-    <main class="app-main">
-      <aside class="sidebar">
-        <div class="sidebar-section faq-section">
-          <div class="sidebar-title">자주 묻는 질문</div>
-          <div class="faq-grid">
-            <button class="faq-btn" data-question="연차는 몇 개 발생하나요?">
-              <span>연차는 몇 개 발생하나요?</span>
-            </button>
-            <button class="faq-btn" data-question="퇴직금은 어떻게 계산되나요?">
-              <span>퇴직금은 어떻게 계산되나요?</span>
-            </button>
-            <button class="faq-btn" data-question="직장 내 괴롭힘 신고 절차는?">
-              <span>직장 내 괴롭힘 신고 절차는?</span>
-            </button>
-            <button class="faq-btn" data-question="육아휴직 신청하려면 어떻게 하나요?">
-              <span>육아휴직 신청하려면 어떻게 하나요?</span>
-            </button>
-            <button class="faq-btn" data-question="전자결재는 어떻게 하나요?">
-              <span>전자결재는 어떻게 하나요?</span>
-            </button>
-            <button class="faq-btn" data-question="경조휴가 신청 절차는?">
-              <span>경조휴가 신청 절차는?</span>
-            </button>
+    <main class="portal-main">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">SHINSUNG COMPANY</p>
+          <h1>신성 HR 인트라넷 포털</h1>
+          <p>로그인부터 근태·휴가·공지·AI 상담까지 한 화면에서 처리하세요.</p>
+        </div>
+        <div class="user-panel" id="userPanel">
+          <span class="user-avatar">게</span>
+          <div>
+            <strong id="userNameLabel">게스트</strong>
+            <small id="userRoleLabel">로그인이 필요합니다</small>
+          </div>
+          <button type="button" class="ghost-btn" id="logoutBtn" hidden>로그아웃</button>
+        </div>
+      </header>
+
+      <section class="auth-grid" id="authSection" aria-label="로그인 및 회원가입">
+        <article class="auth-card login-card">
+          <div class="section-title">
+            <p class="eyebrow">SECURE ACCESS</p>
+            <h2>로그인</h2>
+            <span>승인된 임직원만 포털을 이용할 수 있습니다.</span>
+          </div>
+          <form id="loginForm" class="form-stack">
+            <label>
+              이메일
+              <input type="email" id="loginEmail" value="admin@shinsung.co.kr" autocomplete="email" required />
+            </label>
+            <label>
+              비밀번호
+              <input type="password" id="loginPassword" value="admin1234" autocomplete="current-password" required />
+            </label>
+            <button class="primary-btn" type="submit">로그인</button>
+            <p class="form-message" id="loginMessage">데모 관리자: admin@shinsung.co.kr / admin1234</p>
+          </form>
+        </article>
+
+        <article class="auth-card signup-card">
+          <div class="section-title">
+            <p class="eyebrow">JOIN REQUEST</p>
+            <h2>회원가입</h2>
+            <span>가입 요청은 관리자 승인 후 활성화됩니다.</span>
+          </div>
+          <form id="signupForm" class="form-stack">
+            <div class="two-col">
+              <label>
+                이름
+                <input type="text" id="signupName" placeholder="홍길동" required />
+              </label>
+              <label>
+                부서
+                <select id="signupDept" required>
+                  <option value="인사팀">인사팀</option>
+                  <option value="경영지원팀">경영지원팀</option>
+                  <option value="영업팀">영업팀</option>
+                  <option value="개발팀">개발팀</option>
+                  <option value="생산관리팀">생산관리팀</option>
+                </select>
+              </label>
+            </div>
+            <label>
+              이메일
+              <input type="email" id="signupEmail" placeholder="name@shinsung.co.kr" required />
+            </label>
+            <label>
+              비밀번호
+              <input type="password" id="signupPassword" placeholder="8자 이상 권장" required />
+            </label>
+            <button class="secondary-btn" type="submit">가입 승인 요청</button>
+            <p class="form-message" id="signupMessage">요청 내역은 관리자 승인 목록에 추가됩니다.</p>
+          </form>
+        </article>
+      </section>
+
+      <section class="dashboard-grid content-section active" id="home">
+        <article class="hero-card">
+          <p class="eyebrow">TODAY SUMMARY</p>
+          <h2>안녕하세요, 신성 구성원 여러분.</h2>
+          <p>오늘의 인사 업무 현황과 빠른 신청 메뉴를 확인하세요. 남색 기반의 안정적인 업무형 UI로 구성했습니다.</p>
+          <div class="quick-actions">
+            <button type="button" data-scroll="leave">휴가 신청</button>
+            <button type="button" data-scroll="attendance">출근 체크</button>
+            <button type="button" data-scroll="chatbot">AI 문의</button>
+          </div>
+        </article>
+        <article class="metric-card">
+          <span>승인 대기</span>
+          <strong id="pendingCount">0</strong>
+          <small>회원가입 및 휴가 요청</small>
+        </article>
+        <article class="metric-card">
+          <span>금일 출근</span>
+          <strong id="attendanceCount">0</strong>
+          <small>체크인 완료 인원</small>
+        </article>
+        <article class="metric-card">
+          <span>공지</span>
+          <strong>4</strong>
+          <small>이번 주 중요 공지</small>
+        </article>
+      </section>
+
+      <section class="content-section panel" id="approval">
+        <div class="section-title horizontal">
+          <div>
+            <p class="eyebrow">ADMIN APPROVAL</p>
+            <h2>관리자 승인</h2>
+            <span>가입 요청과 휴가 요청을 검토하고 승인 상태를 변경합니다.</span>
+          </div>
+          <button type="button" class="ghost-btn" id="seedRequestBtn">샘플 요청 추가</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>구분</th>
+                <th>신청자</th>
+                <th>내용</th>
+                <th>상태</th>
+                <th>처리</th>
+              </tr>
+            </thead>
+            <tbody id="approvalTable"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="content-section panel" id="org">
+        <div class="section-title">
+          <p class="eyebrow">ORGANIZATION</p>
+          <h2>조직도</h2>
+          <span>신성의 부서별 담당자를 빠르게 확인할 수 있습니다.</span>
+        </div>
+        <div class="org-chart">
+          <div class="org-node ceo">대표이사<br><strong>김신성</strong></div>
+          <div class="org-branches">
+            <div class="org-node">인사팀<br><strong>박하늘</strong><small>채용·급여·노무</small></div>
+            <div class="org-node">경영지원팀<br><strong>이서연</strong><small>총무·구매·자산</small></div>
+            <div class="org-node">영업팀<br><strong>최도윤</strong><small>국내영업·고객관리</small></div>
+            <div class="org-node">개발팀<br><strong>정민준</strong><small>서비스·데이터·AI</small></div>
+            <div class="org-node">생산관리팀<br><strong>한지우</strong><small>품질·일정·안전</small></div>
           </div>
         </div>
+      </section>
 
-        <div class="sidebar-section history-section">
-          <div class="sidebar-title">최근 질문</div>
-          <div class="history-list" id="historyList">
-            <p class="history-empty">최근 질문이 없습니다</p>
+      <section class="content-section panel" id="notice">
+        <div class="section-title horizontal">
+          <div>
+            <p class="eyebrow">NOTICE BOARD</p>
+            <h2>공지사항</h2>
+            <span>사내 필수 안내와 HR 정책 업데이트를 확인하세요.</span>
           </div>
+          <button type="button" class="primary-btn compact" id="noticeAddBtn">공지 등록</button>
         </div>
-      </aside>
+        <div class="notice-list" id="noticeList"></div>
+      </section>
 
-      <section class="chat-section">
-        <div class="chat-container">
+      <section class="content-section panel" id="leave">
+        <div class="section-title">
+          <p class="eyebrow">LEAVE REQUEST</p>
+          <h2>휴가신청</h2>
+          <span>연차·반차·경조휴가를 신청하면 관리자 승인 목록에 자동 등록됩니다.</span>
+        </div>
+        <form id="leaveForm" class="leave-form">
+          <label>
+            휴가 종류
+            <select id="leaveType">
+              <option>연차</option>
+              <option>오전 반차</option>
+              <option>오후 반차</option>
+              <option>경조휴가</option>
+              <option>병가</option>
+            </select>
+          </label>
+          <label>
+            시작일
+            <input type="date" id="leaveStart" required />
+          </label>
+          <label>
+            종료일
+            <input type="date" id="leaveEnd" required />
+          </label>
+          <label class="wide">
+            사유
+            <input type="text" id="leaveReason" placeholder="휴가 사유를 입력하세요" required />
+          </label>
+          <button class="primary-btn" type="submit">휴가 신청</button>
+        </form>
+        <div class="request-feed" id="leaveFeed"></div>
+      </section>
+
+      <section class="content-section panel" id="attendance">
+        <div class="section-title horizontal">
+          <div>
+            <p class="eyebrow">TIME & ATTENDANCE</p>
+            <h2>근태관리</h2>
+            <span>출근·퇴근 시간을 기록하고 근무 상태를 확인합니다.</span>
+          </div>
+          <div class="clock" id="clockLabel">00:00:00</div>
+        </div>
+        <div class="attendance-actions">
+          <button type="button" class="primary-btn" id="checkInBtn">출근 체크</button>
+          <button type="button" class="secondary-btn" id="checkOutBtn">퇴근 체크</button>
+        </div>
+        <div class="attendance-log" id="attendanceLog"></div>
+      </section>
+
+      <section class="content-section panel chatbot-panel" id="chatbot">
+        <div class="section-title">
+          <p class="eyebrow">AI HR ASSISTANT</p>
+          <h2>AI 챗봇</h2>
+          <span>휴가, 근태, 복리후생, 승인 절차에 대해 즉시 안내합니다.</span>
+        </div>
+        <div class="chat-layout">
           <div class="chat-window" id="chatWindow">
-            <div class="chat-history" id="chatHistory">
-              <div class="empty-state" id="emptyState">
-                <p>질문을 입력하거나 FAQ를 선택해 시작하세요.</p>
-              </div>
-            </div>
+            <div class="bot-message message">안녕하세요. 신성 HR AI 챗봇입니다. 궁금한 인사 업무를 물어보세요.</div>
           </div>
-
-          <div class="input-section">
-            <div class="input-wrapper">
-              <textarea id="userInput" placeholder="질문을 입력하세요..." rows="2"></textarea>
-              <button class="btn-send" id="sendBtn">전송</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="answer-panel">
-          <div class="answer-header">
-            <div>
-              <h3>AI 답변</h3>
-              <p class="answer-tip">단계별 절차, 준비 서류, 담당 부서까지 한 번에 확인하세요.</p>
-            </div>
-          </div>
-          <div class="answer-content" id="aiAnswer">
-            <div class="answer-card empty-card" id="emptyAnswerCard">
-              <p>질문을 입력하거나 FAQ를 선택하면 표준 취업규칙 기반 답변이 카드 형태로 표시됩니다.</p>
-            </div>
+          <form id="chatForm" class="chat-form">
+            <input id="chatInput" type="text" placeholder="예: 연차 신청은 어떻게 하나요?" autocomplete="off" />
+            <button class="primary-btn" type="submit">전송</button>
+          </form>
+          <div class="suggestions">
+            <button type="button" data-question="휴가 신청 절차 알려줘">휴가 신청</button>
+            <button type="button" data-question="출근 체크는 어디서 해?">근태관리</button>
+            <button type="button" data-question="회원가입 승인은 누가 하나요?">관리자 승인</button>
           </div>
         </div>
       </section>
