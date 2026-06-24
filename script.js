@@ -61,9 +61,9 @@ const noticeRows = [
 ];
 
 const calEvents = {
-  "2026-6-6":[["holiday","현충일"]], "2026-6-10":[["trip","출장"]], "2026-6-12":[["leave","연차"]],
-  "2026-6-15":[["edu","교육"]], "2026-6-18":[["half","반차"]], "2026-6-20":[["leave","연차"]],
-  "2026-6-27":[["trip","출장"]]
+  "2026-6-10":[["trip","출장"]], "2026-6-12":[["leave","연차"]],
+  "2026-6-18":[["half","반차"]], "2026-6-20":[["leave","연차"]],
+  "2026-6-27":[["trip","출장"]], "2026-7-21":[["summer","여름휴가"]], "2026-8-11":[["summer","여름휴가"]]
 };
 
 const policy = [
@@ -218,7 +218,8 @@ const icons = {
   report:`<svg viewBox="0 0 24 24"><path d="M5 19V5M5 19h14"/><path d="M8 16v-4M12 16V8M16 16v-7"/></svg>`,
   admin:`<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19 12a7 7 0 0 0-.1-1l2-1.5-2-3.4-2.4 1a7 7 0 0 0-1.7-1L14.5 3h-5l-.3 3.1a7 7 0 0 0-1.7 1l-2.4-1-2 3.4L5.1 11a7 7 0 0 0 0 2l-2 1.5 2 3.4 2.4-1a7 7 0 0 0 1.7 1l.3 3.1h5l.3-3.1a7 7 0 0 0 1.7-1l2.4 1 2-3.4-2-1.5c.1-.3.1-.7.1-1Z"/></svg>`,
   approval:`<svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>`,
-  org:`<svg viewBox="0 0 24 24"><path d="M12 6v4M6 14h12M6 14v4M12 14v4M18 14v4"/><rect x="9" y="3" width="6" height="5" rx="1"/><rect x="3" y="18" width="6" height="3" rx="1"/><rect x="9" y="18" width="6" height="3" rx="1"/><rect x="15" y="18" width="6" height="3" rx="1"/></svg>`
+  org:`<svg viewBox="0 0 24 24"><path d="M12 6v4M6 14h12M6 14v4M12 14v4M18 14v4"/><rect x="9" y="3" width="6" height="5" rx="1"/><rect x="3" y="18" width="6" height="3" rx="1"/><rect x="9" y="18" width="6" height="3" rx="1"/><rect x="15" y="18" width="6" height="3" rx="1"/></svg>`,
+  edu:`<svg viewBox="0 0 24 24"><path d="M12 3L2 8l10 5 10-5-10-5z"/><path d="M2 8v6M6 10.5v5c0 1.5 2.7 3 6 3s6-1.5 6-3v-5"/></svg>`
 };
 
 function renderNav(){
@@ -232,6 +233,7 @@ function renderNav(){
     {label:"출장원 신청", page:"tripApply", icon:"trip", sub:true},
     {label:"출장원 현황", page:"tripStatus", icon:"tripStatus", sub:true},
     {label:"하계휴가 조사", page:"vacation", icon:"vacation", sub:true},
+    {label:"법정의무교육", page:"legalEdu", icon:"edu", sub:true},
     {section:"복리후생"},
     {label:"복리후생 신청", page:"welfare", icon:"welfare", sub:true},
     {label:"복리후생 현황", page:"welfareStatus", icon:"status", sub:true},
@@ -266,6 +268,7 @@ function changePage(page){
     tripApply:["출장원 신청","출장 목적, 기간, 비용을 작성합니다."],
     tripStatus:["출장원 현황","출장 신청 및 승인 상태를 확인합니다."],
     vacation:["하계휴가 조사","팀원 제출 여부와 내 휴가 일정을 확인합니다."],
+    legalEdu:["법정의무교육","법정의무교육 수료 현황을 확인하고 관리합니다."],
     welfare:["복리후생 신청","경조금, 교육, 보일러, 증명서를 신청합니다."],
     welfareStatus:["복리후생 신청 현황","복리후생 신청 건의 처리상태를 확인합니다."],
     schedule:["일정관리","부서/팀 일정과 개인 일정을 확인합니다."],
@@ -279,7 +282,7 @@ function changePage(page){
   $("#pageDesc").textContent=titles[page]?.[1]||"";
   const map = {
     home:renderHome, ai:renderAI, attendance:renderAttendance, attendanceStatus:renderAttendanceStatus, tripApply:renderTripApply, tripStatus:renderTripStatus,
-    vacation:renderVacation, welfare:renderWelfare, welfareStatus:renderWelfareStatus, schedule:renderSchedule, org:renderOrg, myinfo:renderMyInfo,
+    vacation:renderVacation, legalEdu:renderLegalEdu, welfare:renderWelfare, welfareStatus:renderWelfareStatus, schedule:renderSchedule, org:renderOrg, myinfo:renderMyInfo,
     approval:renderApproval, vacationReport:renderVacationReport, admin:renderAdmin
   };
   $("#content").innerHTML = "";
@@ -330,7 +333,7 @@ function renderCalendar(){
       const dt=new Date(ev.start);
       return dt.getFullYear()===y && dt.getMonth()===m && dt.getDate()===d;
     }).map(ev=>["schedule",ev.title]);
-    const dots=[...(calEvents[key]||[]), ...dynamic].map(([type])=>`<i class="${type==='leave'?'leave':type==='trip'?'trip':type==='edu'?'edu':type==='half'?'half':type==='holiday'?'holiday':'schedule'}"></i>`).join("");
+    const dots=[...(calEvents[key]||[]), ...dynamic].map(([type])=>`<i class="${type==='leave'?'leave':type==='trip'?'trip':type==='edu'?'edu':type==='half'?'half':type==='summer'?'summer':'schedule'}"></i>`).join("");
     const today=new Date();
     const isToday = y===today.getFullYear() && m===today.getMonth() && d===today.getDate();
     html+=`<div class="cal-day ${isToday?'today':''}">${d}<div class="cal-dots">${dots}</div></div>`;
@@ -510,7 +513,8 @@ function approveRequest(id){
       end:r.fields.end||r.fields.start||"2026-06-18",
       dept:r.fields.dept||state.user.dept,
       team:r.fields.team||state.user.team,
-      people:r.fields.people||"",
+      related:r.fields.related||[],
+      memo:r.fields.memo||"",
       owner:r.user,
       status:"승인"
     });
@@ -641,45 +645,405 @@ function renderVacationReport(){
 }
 
 function renderSchedule(){
-  const y=2026, m=5;
+  const y=state.year, m=state.month;
   const first=new Date(y,m,1).getDay();
   const last=new Date(y,m+1,0).getDate();
   const baseEvents = [
     {day:6,type:"leave",text:`${state.user.name} 연차`},
-    {day:11,type:"trip",text:"업무 검토"},
+    {day:11,type:"trip",text:"업무 출장"},
     {day:20,type:"half",text:`${state.user.name} 반차`},
-    {day:24,type:"edu",text:"교육 일정"}
+    {day:24,type:"summer",text:"여름휴가"}
   ];
   const approvedEvents = state.userSchedules.filter(s=>s.status==="승인" && s.start).map(s=>{
     const dt=new Date(s.start);
-    return {day:dt.getDate(), type:"schedule", text:s.title};
+    return {day:dt.getDate(), type:"schedule", text:s.title, full:s};
   });
   const allEvents=[...baseEvents,...approvedEvents];
   let cells = '';
   for(let i=0;i<first;i++) cells += `<div class="month-cell empty"></div>`;
+  const today=new Date();
   for(let d=1; d<=last; d++){
-    const ev=allEvents.filter(e=>e.day===d).map(e=>`<div class="month-event ${e.type}">${e.text}</div>`).join("");
-    cells += `<div class="month-cell ${d===18?'selected':''}"><b>${d}</b>${ev}</div>`;
+    const isToday=y===today.getFullYear()&&m===today.getMonth()&&d===today.getDate();
+    const approvedList = state.userSchedules.filter(s=>s.status==="승인");
+    const ev=allEvents.filter(e=>e.day===d).map(e=>{
+      if(e.full){
+        const idx=approvedList.findIndex(x=>x===e.full);
+        return `<div class="month-event schedule schedule-clickable" onclick="showScheduleDetail(${idx})" style="cursor:pointer">${e.text}</div>`;
+      }
+      return `<div class="month-event ${e.type}">${e.text}</div>`;
+    }).join("");
+    cells += `<div class="month-cell ${isToday?'selected':''}"><b>${d}</b>${ev}</div>`;
   }
+
+  // 사이드패널 업무 관련자 목록 (state.panelRelated에서 관리)
+  if(!state.panelRelated) state.panelRelated = [];
+  const panelPeople = state.panelRelated;
+  const approvedList = state.userSchedules.filter(s=>s.status==="승인");
+
+  const relatedHtml = panelPeople.length
+    ? panelPeople.map((p,i)=>`
+        <div class="panel-related-item">
+          <span><i class="lg schedule"></i>${p.name} <em>${p.title}</em></span>
+          <button class="panel-related-remove" onclick="removePanelRelated(${i})" title="삭제">×</button>
+        </div>`).join("")
+    : `<p class="panel-empty-hint">관련자 없음</p>`;
+
   $("#content").innerHTML = `<div class="calendar-main card">
     <div class="calendar-main-head">
       <div><h3>일정관리</h3><p>부서/팀 일정 및 업무 관련자 일정을 함께 관리합니다.</p></div>
-      <button class="primary" data-form="schedule">내 일정 추가</button>
+      <button class="primary" onclick="openScheduleModal()">+ 내 일정 추가</button>
     </div>
     <div class="calendar-body-layout">
       <aside class="calendar-team-panel">
         <b>우리 팀 · ${state.user.team || state.user.dept}</b>
-        <p><i class="lg leave"></i>${state.user.name} (${state.user.title})</p>
-        <p><i class="lg edu"></i>업무 관련자 <button class="tiny-add" data-form="schedule">+ 추가</button></p>
-        <small>관련자를 수기로 입력하면 일정에 함께 표시됩니다.</small>
+        <div class="panel-me-row"><i class="lg leave"></i><span>${state.user.name} <em>${state.user.title}</em></span></div>
+
+        <div class="panel-related-section">
+          <div class="panel-related-head">
+            <b>업무 관련자</b>
+            <button class="panel-add-btn" onclick="togglePanelSearch()" id="panelAddBtn">+ 추가</button>
+          </div>
+          <div id="panelSearchBox" class="panel-search-box hidden">
+            <input id="panelSearchInput" placeholder="이름 검색 (예: 김)" autocomplete="off" oninput="searchPanelRelated(this.value)">
+            <div id="panelSearchResults" class="panel-search-results hidden"></div>
+          </div>
+          <div id="panelRelatedList">${relatedHtml}</div>
+        </div>
+
+        <div class="panel-schedule-section">
+          <b>등록된 일정 (${approvedList.length}건)</b>
+          ${approvedList.length ? approvedList.slice(0,5).map((s,i)=>`<div class="schedule-mini-item" onclick="showScheduleDetail(${i})">${s.title}<span style="font-size:11px;color:#94a3b8;margin-left:4px">${s.start||''}</span></div>`).join("") : `<p class="panel-empty-hint">등록된 일정 없음</p>`}
+        </div>
       </aside>
       <section class="month-board">
-        <div class="month-board-head"><h3>2026년 6월</h3><div class="month-legend"><span><i class="lg leave"></i>연차</span><span><i class="lg trip"></i>출장</span><span><i class="lg schedule"></i>승인일정</span></div></div>
+        <div class="month-board-head">
+          <h3>${y}년 ${m+1}월</h3>
+          <div class="month-legend">
+            <span><i class="lg leave"></i>연차</span>
+            <span><i class="lg half"></i>반차</span>
+            <span><i class="lg trip"></i>출장</span>
+            <span><i class="lg summer"></i>여름휴가</span>
+          </div>
+        </div>
         <div class="month-week"><span>일</span><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span>토</span></div>
         <div class="month-grid">${cells}</div>
       </section>
     </div>
   </div>`;
+}
+
+function togglePanelSearch(){
+  const box = $("#panelSearchBox");
+  const btn = $("#panelAddBtn");
+  if(!box) return;
+  const isHidden = box.classList.contains("hidden");
+  box.classList.toggle("hidden", !isHidden);
+  if(isHidden){
+    btn.textContent = "✕ 닫기";
+    btn.classList.add("panel-add-btn-active");
+    setTimeout(()=>{ const inp=$("#panelSearchInput"); if(inp) inp.focus(); }, 50);
+  } else {
+    btn.textContent = "+ 추가";
+    btn.classList.remove("panel-add-btn-active");
+    const res=$("#panelSearchResults"); if(res) res.classList.add("hidden");
+    const inp=$("#panelSearchInput"); if(inp) inp.value="";
+  }
+}
+
+function searchPanelRelated(q){
+  const box=$("#panelSearchResults");
+  if(!box) return;
+  if(!q.trim()){box.classList.add("hidden");return;}
+  if(!state.panelRelated) state.panelRelated=[];
+  const results=employees.filter(e=>
+    e.name.includes(q) &&
+    e.name!==state.user.name &&
+    !state.panelRelated.find(r=>r.name===e.name)
+  );
+  if(!results.length){
+    box.innerHTML=`<div class="panel-search-item no-result">검색 결과 없음</div>`;
+    box.classList.remove("hidden");
+    return;
+  }
+  box.innerHTML=results.map(e=>`
+    <div class="panel-search-item" onclick="addPanelRelated('${e.name}','${e.title}','${e.dept}')">
+      <span class="psr-name">${e.name}</span>
+      <span class="psr-meta">${e.title} · ${e.dept}</span>
+    </div>`).join("");
+  box.classList.remove("hidden");
+}
+
+function addPanelRelated(name, title, dept){
+  if(!state.panelRelated) state.panelRelated=[];
+  if(state.panelRelated.find(r=>r.name===name)) return;
+  state.panelRelated.push({name, title, dept});
+  // 목록 갱신
+  const list=$("#panelRelatedList");
+  if(list){
+    list.innerHTML = state.panelRelated.map((p,i)=>`
+      <div class="panel-related-item">
+        <span><i class="lg schedule"></i>${p.name} <em>${p.title}</em></span>
+        <button class="panel-related-remove" onclick="removePanelRelated(${i})" title="삭제">×</button>
+      </div>`).join("");
+  }
+  // 검색창 초기화
+  const inp=$("#panelSearchInput"); if(inp) inp.value="";
+  const res=$("#panelSearchResults"); if(res) res.classList.add("hidden");
+  toast(`${name} 님을 업무 관련자로 추가했습니다.`);
+}
+
+function removePanelRelated(idx){
+  if(!state.panelRelated) return;
+  const removed = state.panelRelated.splice(idx, 1);
+  const list=$("#panelRelatedList");
+  if(list){
+    list.innerHTML = state.panelRelated.length
+      ? state.panelRelated.map((p,i)=>`
+          <div class="panel-related-item">
+            <span><i class="lg schedule"></i>${p.name} <em>${p.title}</em></span>
+            <button class="panel-related-remove" onclick="removePanelRelated(${i})" title="삭제">×</button>
+          </div>`).join("")
+      : `<p class="panel-empty-hint">관련자 없음</p>`;
+  }
+  if(removed.length) toast(`${removed[0].name} 님을 관련자에서 제거했습니다.`);
+}
+
+function openScheduleModal(){
+  $("#modalTitle").textContent = "일정 등록";
+  $("#modal").dataset.type = "schedule";
+  window._selectedRelated = [];
+  $("#modalBody").innerHTML = `
+    <label>일정명</label>
+    <input name="scheduleTitle" placeholder="예: 팀 회의">
+    <div class="form-2">
+      <div><label>시작일</label><input name="scheduleStart" type="date"></div>
+      <div><label>종료일</label><input name="scheduleEnd" type="date"></div>
+    </div>
+    <label>업무 관련자 추가</label>
+    <div class="related-search-wrap">
+      <div class="related-search-box">
+        <input id="relatedSearchInput" placeholder="이름으로 검색 (예: 김)" autocomplete="off" oninput="searchRelated(this.value)">
+      </div>
+      <div id="relatedResults" class="related-results hidden"></div>
+      <div id="selectedRelated" class="selected-related"></div>
+    </div>
+    <label>내용</label>
+    <textarea name="scheduleMemo" placeholder="일정 상세 내용"></textarea>
+  `;
+  $("#modal").classList.remove("hidden");
+}
+
+function searchRelated(q){
+  const box=$("#relatedResults");
+  if(!q.trim()){box.classList.add("hidden");return;}
+  const results=employees.filter(e=>e.name.includes(q)&&e.name!==state.user.name);
+  if(!results.length){box.innerHTML=`<div class="related-item no-result">검색 결과 없음</div>`;box.classList.remove("hidden");return;}
+  box.innerHTML=results.map(e=>`<div class="related-item" onclick="selectRelated('${e.name}','${e.title}','${e.dept}')">${e.name} <span>${e.title} · ${e.dept}</span></div>`).join("");
+  box.classList.remove("hidden");
+}
+
+function selectRelated(name,title,dept){
+  if(!window._selectedRelated) window._selectedRelated=[];
+  if(window._selectedRelated.find(r=>r.name===name)) return;
+  window._selectedRelated.push({name,title,dept});
+  renderSelectedRelated();
+  $("#relatedSearchInput").value="";
+  $("#relatedResults").classList.add("hidden");
+}
+
+function removeRelated(name){
+  window._selectedRelated=window._selectedRelated.filter(r=>r.name!==name);
+  renderSelectedRelated();
+}
+
+function renderSelectedRelated(){
+  const box=$("#selectedRelated");
+  if(!box) return;
+  box.innerHTML=window._selectedRelated.map(r=>`<span class="related-chip">${r.name} ${r.title} <button onclick="removeRelated('${r.name}')">×</button></span>`).join("");
+}
+
+function showScheduleDetail(idx){
+  const list=state.userSchedules.filter(x=>x.status==="승인");
+  const s=list[idx];
+  if(!s) return;
+  const related=(s.related||[]).map(r=>`<span class="related-chip">${r.name} ${r.title}</span>`).join("") || `<span style="color:#94a3b8;font-size:13px">없음</span>`;
+  const period = s.start ? (s.end && s.end !== s.start ? `${s.start} ~ ${s.end}` : s.start) : "-";
+  $("#modalTitle").textContent="일정 상세";
+  $("#modal").dataset.type="readonly";
+  $("#modalBody").innerHTML=`
+    <div class="schedule-detail">
+      <div class="sd-row"><b>일정명</b><p style="font-size:15px;font-weight:800;color:#122033">${s.title}</p></div>
+      <div class="sd-row"><b>기간</b><p>${period}</p></div>
+      <div class="sd-row"><b>업무 관련자</b><div class="sd-chips" style="margin-top:6px;display:flex;flex-wrap:wrap;gap:6px">${related}</div></div>
+      ${s.memo?`<div class="sd-row"><b>내용</b><p style="white-space:pre-line">${s.memo}</p></div>`:""}
+      <div class="sd-row"><b>상태</b><p><span class="badge">${s.status}</span></p></div>
+    </div>`;
+  $("#modalSubmit").style.display="none";
+  $("#modal").classList.remove("hidden");
+}
+
+// submitModal 에서 schedule 처리 override
+const _origSubmitModal = submitModal;
+function submitModal(){
+  const type=$("#modal").dataset.type;
+  if(type==="readonly"){closeModal();$("#modalSubmit").style.display="";return;}
+  if(type==="schedule"){
+    const title=$("[name='scheduleTitle']")?.value?.trim()||"일정 등록";
+    const start=$("[name='scheduleStart']")?.value||"";
+    const end=$("[name='scheduleEnd']")?.value||"";
+    const memo=$("[name='scheduleMemo']")?.value?.trim()||"";
+    if(!start) return toast("일정 시작일을 입력해 주세요.");
+    const related=window._selectedRelated||[];
+    const fields={title,start,end,memo,related,dept:state.user.dept,team:state.user.team};
+    state.requests.unshift({id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),type:"schedule",title,user:state.user.name,date:new Date().toLocaleString("ko-KR"),status:"승인대기",done:false,fields});
+    saveRequests();updateRightbar();closeModal();
+    toast("일정이 제출되었습니다. 관리자 승인 후 반영됩니다.");
+    return;
+  }
+  // 기존 로직
+  const title=$("#modalTitle").textContent;
+  state.requests.unshift({id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),type,title,user:state.user.name,date:new Date().toLocaleString("ko-KR"),status:"승인대기",done:false,fields:{}});
+  saveRequests();updateRightbar();closeModal();
+  toast("제출되었습니다. 관리자 승인 후 반영됩니다.");
+}
+
+// 법정의무교육 데이터
+const legalEduData = {
+  courses: [
+    {id:"safety", name:"산업안전교육", total:15, completed:12, deadline:"2026-12-31"},
+    {id:"privacy", name:"개인정보보호교육", total:15, completed:14, deadline:"2026-09-30"},
+    {id:"harassment", name:"직장내괴롭힘예방교육", total:15, completed:10, deadline:"2026-11-30"},
+    {id:"sexual", name:"성희롱예방교육", total:15, completed:13, deadline:"2026-09-30"}
+  ],
+  incomplete: [
+    {name:"박서연", dept:"법무팀", courses:["직장내괴롭힘예방교육"]},
+    {name:"지한솔", dept:"공조영업팀", courses:["산업안전교육","직장내괴롭힘예방교육"]},
+    {name:"김한영", dept:"기술연구소", courses:["직장내괴롭힘예방교육","성희롱예방교육"]},
+    {name:"권순형", dept:"공조영업팀", courses:["산업안전교육"]},
+    {name:"오대양", dept:"공사2팀", courses:["개인정보보호교육","직장내괴롭힘예방교육"]}
+  ]
+};
+
+function renderLegalEdu(){
+  const role = state.user.role;
+  const isAdmin = role === "admin";
+  isAdmin ? renderLegalEduAdmin() : renderLegalEduUser();
+}
+
+// 직원용: 내 수료 현황만
+function renderLegalEduUser(){
+  const u = state.user;
+  const myIncomplete = legalEduData.incomplete.find(p=>p.name===u.name);
+  const today = new Date(); today.setHours(0,0,0,0);
+
+  function deadlineTag(deadlineStr, done){
+    const dl = new Date(deadlineStr); dl.setHours(0,0,0,0);
+    const diff = Math.ceil((dl - today) / (1000*60*60*24));
+    if(done) return `<span style="color:var(--sub);font-size:12px">${deadlineStr}</span>`;
+    if(diff < 0)  return `<span style="font-size:12px;font-weight:800;color:#B91C1C">${deadlineStr} <span style="background:#FEE2E2;color:#B91C1C;border-radius:6px;padding:1px 6px;font-size:11px">기한 초과</span></span>`;
+    if(diff <= 30) return `<span style="font-size:12px;font-weight:800;color:#B45309">${deadlineStr} <span style="background:#FFF3DA;color:#B45309;border-radius:6px;padding:1px 6px;font-size:11px">D-${diff}</span></span>`;
+    if(diff <= 90) return `<span style="font-size:12px;color:#1D4ED8">${deadlineStr} <span style="background:#EAF2FF;color:#1D4ED8;border-radius:6px;padding:1px 6px;font-size:11px">D-${diff}</span></span>`;
+    return `<span style="color:var(--sub);font-size:12px">${deadlineStr} <span style="color:#94a3b8;font-size:11px">D-${diff}</span></span>`;
+  }
+
+  const myRows = legalEduData.courses.map(c=>{
+    const done = myIncomplete ? !myIncomplete.courses.includes(c.name) : true;
+    return `<tr>
+      <td><b>${c.name}</b></td>
+      <td>${deadlineTag(c.deadline, done)}</td>
+      <td><span class="badge ${done?'':'red'}">${done?'수료완료':'미수료'}</span></td>
+    </tr>`;
+  }).join("");
+
+  const allDone = !myIncomplete;
+  const borderColor = allDone ? '#16A26A' : 'var(--red)';
+  const icon = allDone
+    ? `<div class="edu-status-icon edu-done">✓</div>`
+    : `<div class="edu-status-icon edu-warn">!</div>`;
+
+  $("#content").innerHTML = `
+    <div class="card edu-status-card" style="margin-bottom:16px;border:2px solid ${borderColor}">
+      <div style="display:flex;align-items:center;gap:16px">
+        ${icon}
+        <div>
+          <h3 style="margin-bottom:4px;color:${allDone?'#0F5132':'#B91C1C'}">${allDone?'모든 법정의무교육을 수료했습니다':'미수료 교육이 있습니다'}</h3>
+          <p style="font-size:13px;color:var(--sub)">${allDone?'올해 법정의무교육을 모두 완료했습니다. 수고하셨습니다 😊':'아래 미수료 항목을 확인하고 인사담당자에게 문의하세요.'}</p>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <h3 style="margin-bottom:14px">내 법정의무교육 현황</h3>
+      <table class="table">
+        <thead><tr><th>교육명</th><th>이수 기한</th><th>수료 여부</th></tr></thead>
+        <tbody>${myRows}</tbody>
+      </table>
+      <p style="margin-top:14px;font-size:12px;color:var(--sub)">※ 수료 이력은 인사담당자가 확인 후 반영합니다. 문의: 이태리 사원</p>
+    </div>`;
+}
+
+// 관리자/팀장/대표이사용: 전체 현황
+function renderLegalEduAdmin(){
+  const {courses, incomplete} = legalEduData;
+  const totalEmp = 15;
+  const allCompleted = courses.reduce((s,c)=>s+c.completed,0);
+  const allTotal = courses.reduce((s,c)=>s+c.total,0);
+  const overallRate = Math.round(allCompleted/allTotal*100);
+  const incompleteCount = incomplete.length;
+  const todayCount = 2;
+
+  const courseRows = courses.map(c=>{
+    const rate=Math.round(c.completed/c.total*100);
+    const barColor = rate>=80?"var(--green)":rate>=50?"var(--orange)":"var(--red)";
+    return `<tr>
+      <td><b>${c.name}</b></td>
+      <td>${c.completed}/${c.total}명</td>
+      <td>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div style="flex:1;height:8px;background:#EDF2F7;border-radius:99px;overflow:hidden">
+            <div style="width:${rate}%;height:100%;background:${barColor};border-radius:99px"></div>
+          </div>
+          <span style="font-weight:900;color:${barColor};width:38px;text-align:right">${rate}%</span>
+        </div>
+      </td>
+      <td><span class="badge ${rate===100?'':'orange'}">${rate===100?'완료':'진행중'}</span></td>
+      <td style="color:var(--sub);font-size:12px">${c.deadline}</td>
+    </tr>`;
+  }).join("");
+
+  const incompleteRows = incomplete.map(p=>`<tr>
+    <td>${p.name}</td>
+    <td>${p.dept}</td>
+    <td>${p.courses.map(c=>`<span class="badge red" style="margin-right:4px">${c}</span>`).join("")}</td>
+  </tr>`).join("");
+
+  $("#content").innerHTML = `
+    <div class="kpi" style="grid-template-columns:repeat(3,1fr)">
+      <div class="card"><span>전체 수료율</span><strong style="color:var(--green)">${overallRate}<em>%</em></strong><p>${allCompleted}/${allTotal}건 완료</p><div class="bar"><i style="width:${overallRate}%"></i></div></div>
+      <div class="card"><span>미수료자 수</span><strong style="color:var(--red)">${incompleteCount}<em>명</em></strong><p>재안내 필요</p><div class="bar orange"><i style="width:${Math.round(incompleteCount/totalEmp*100)}%"></i></div></div>
+      <div class="card"><span>오늘 수료자</span><strong style="color:var(--blue)">${todayCount}<em>명</em></strong><p>오늘 신규 수료</p><div class="bar"><i style="background:var(--blue);width:${Math.round(todayCount/totalEmp*100)}%"></i></div></div>
+    </div>
+    <div class="card" style="margin-bottom:16px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+        <h3>교육별 수료 현황</h3>
+      </div>
+      <table class="table">
+        <thead><tr><th>교육명</th><th>수료 인원</th><th>수료율</th><th>상태</th><th>이수 기한</th></tr></thead>
+        <tbody>${courseRows}</tbody>
+      </table>
+    </div>
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+        <h3>미수료자 현황 <span class="badge red" style="margin-left:8px">${incompleteCount}명</span></h3>
+        <div style="display:flex;gap:10px">
+          <button class="ghost" onclick="toast('미수료자 ${incompleteCount}명에게 재안내 메일이 발송되었습니다.')">📧 미수료자 재안내</button>
+          <button class="primary" onclick="toast('엑셀 다운로드가 완료되었습니다.')">⬇ 엑셀 다운로드</button>
+        </div>
+      </div>
+      <table class="table">
+        <thead><tr><th>이름</th><th>부서</th><th>미수료 교육</th></tr></thead>
+        <tbody>${incompleteRows}</tbody>
+      </table>
+    </div>`;
 }
 
 function renderOrg(){
@@ -712,6 +1076,7 @@ function renderRequestStatus(title, filter=()=>true){
 }
 
 function openForm(type){
+  if(type==="schedule"){return openScheduleModal();}
   const names={attendance:"근태신청서",attmod:"근태수정신청서",trip:"출장원 신청서",gyeongjo:"경조금 신청서",edu:"교육 신청서",boiler:"보일러 신청서",cert:"증명서 신청서",vacation:"하계휴가 조사",schedule:"일정 등록"};
   $("#modalTitle").textContent=names[type]||"신청서";
   $("#modal").dataset.type=type;
@@ -734,30 +1099,10 @@ function openForm(type){
 function closeModal(){
   $("#modal").classList.add("hidden");
   $("#modalBody").innerHTML="";
+  $("#modalSubmit").style.display="";
 }
 
-function submitModal(){
-  const type=$("#modal").dataset.type;
-  const title=$("#modalTitle").textContent;
-  let fields={};
-  if(type==="schedule"){
-    fields={
-      title:$("[name='scheduleTitle']")?.value?.trim() || "일정 등록",
-      start:$("[name='scheduleStart']")?.value || "",
-      end:$("[name='scheduleEnd']")?.value || "",
-      dept:$("[name='scheduleDept']")?.value || state.user.dept,
-      team:$("[name='scheduleTeam']")?.value?.trim() || state.user.team,
-      people:$("[name='schedulePeople']")?.value?.trim() || "",
-      memo:$("[name='scheduleMemo']")?.value?.trim() || ""
-    };
-    if(!fields.start) return toast("일정 시작일을 입력해 주세요.");
-  }
-  state.requests.unshift({id:Date.now().toString(36)+Math.random().toString(36).slice(2,6), type, title, user:state.user.name, date:new Date().toLocaleString("ko-KR"), status:"승인대기", done:false, fields});
-  saveRequests();
-  updateRightbar();
-  closeModal();
-  toast("제출되었습니다. 관리자 승인 후 반영됩니다.");
-}
+// submitModal은 위(renderSchedule 근처)에서 정의됨
 
 function vacSummary(rows){
   const total=rows.length, done=rows.filter(r=>r.status==="제출완료").length;
@@ -861,3 +1206,6 @@ function renderHome(){
 }
 
 
+
+
+function demoTalk(){ alert("데모 화면입니다. 향후 사내 메신저 연동 예정입니다."); }
