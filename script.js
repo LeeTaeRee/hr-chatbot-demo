@@ -28,6 +28,8 @@ const employees = [
   {employeeId:"SS200777", name:"김한영", title:"이사", dept:"기술연구소", team:"하이테크개발팀", phone:"02-2600-9680", email:"hy.kim@shinsung.co.kr"}
 ];
 
+const orgUploadedEmployees = [{"employeeId": "ORG0001", "name": "이경민", "title": "계약직", "dept": "공사1팀", "team": "공사1팀", "phone": "-", "email": "-"}, {"employeeId": "ORG0002", "name": "김민서", "title": "계약직", "dept": "공사1팀", "team": "공사1팀", "phone": "-", "email": "-"}, {"employeeId": "ORG0003", "name": "진성욱", "title": "계약직", "dept": "공사1팀", "team": "공사1팀", "phone": "-", "email": "-"}, {"employeeId": "ORG0004", "name": "오대양", "title": "계약직", "dept": "공사2팀", "team": "공사2팀", "phone": "-", "email": "-"}, {"employeeId": "ORG0005", "name": "황남열", "title": "4급", "dept": "CS팀", "team": "CS팀", "phone": "-", "email": "-"}];
+
 const vacationRows = [
   {dept:"경영전략실", team:"대표이사", name:"박대표", title:"대표이사", start:"2026-08-05", end:"2026-08-07", status:"제출완료"},
   {dept:"법무팀", team:"법무팀", name:"김민준", title:"팀장", start:"2026-07-28", end:"2026-08-01", status:"제출완료"},
@@ -233,7 +235,6 @@ function renderNav(){
     {label:"출장원 신청", page:"tripApply", icon:"trip", sub:true},
     {label:"출장원 현황", page:"tripStatus", icon:"tripStatus", sub:true},
     {label:"하계휴가 조사", page:"vacation", icon:"vacation", sub:true},
-    {label:"법정의무교육", page:"legalEdu", icon:"edu", sub:true},
     {section:"복리후생"},
     {label:"복리후생 신청", page:"welfare", icon:"welfare", sub:true},
     {label:"복리후생 현황", page:"welfareStatus", icon:"status", sub:true},
@@ -268,7 +269,6 @@ function changePage(page){
     tripApply:["출장원 신청","출장 목적, 기간, 비용을 작성합니다."],
     tripStatus:["출장원 현황","출장 신청 및 승인 상태를 확인합니다."],
     vacation:["하계휴가 조사","팀원 제출 여부와 내 휴가 일정을 확인합니다."],
-    legalEdu:["법정의무교육","법정의무교육 수료 현황을 확인하고 관리합니다."],
     welfare:["복리후생 신청","경조금, 교육, 보일러, 증명서를 신청합니다."],
     welfareStatus:["복리후생 신청 현황","복리후생 신청 건의 처리상태를 확인합니다."],
     schedule:["일정관리","부서/팀 일정과 개인 일정을 확인합니다."],
@@ -282,7 +282,7 @@ function changePage(page){
   $("#pageDesc").textContent=titles[page]?.[1]||"";
   const map = {
     home:renderHome, ai:renderAI, attendance:renderAttendance, attendanceStatus:renderAttendanceStatus, tripApply:renderTripApply, tripStatus:renderTripStatus,
-    vacation:renderVacation, legalEdu:renderLegalEdu, welfare:renderWelfare, welfareStatus:renderWelfareStatus, schedule:renderSchedule, org:renderOrg, myinfo:renderMyInfo,
+    vacation:renderVacation, welfare:renderWelfare, welfareStatus:renderWelfareStatus, schedule:renderSchedule, org:renderOrg, myinfo:renderMyInfo,
     approval:renderApproval, vacationReport:renderVacationReport, admin:renderAdmin
   };
   $("#content").innerHTML = "";
@@ -644,92 +644,172 @@ function renderVacationReport(){
   <div class="card" style="margin-top:16px"><h3>보고 멘트 예시</h3><p>현재 하계휴가 조사 대상 ${total}명 중 ${done}명이 제출하여 제출률은 ${Math.round(done/total*100)}%입니다. 미제출 인원은 각 팀장에게 재안내 후 최종 취합 예정입니다.</p></div>`;
 }
 
+// 일정 목록 데이터 (데모)
+const demoScheduleList = [
+  {type:"leave", color:"#16A26A", title:"연차 사용", owner:"이수연 사원", start:"2026.06.12 (금)", end:"2026.06.12 (금)", related:[{initials:"이수"},{initials:"김민"}], extra:2},
+  {type:"half",  color:"#7C3AED", title:"반차 사용", owner:"김민준 팀장", start:"2026.06.18 (목)", end:null, related:[{initials:"박서"},{initials:"지한"}], extra:1},
+  {type:"trip",  color:"#F59E0B", title:"출장 (부산)", owner:"이태리 사원", start:"2026.06.20 (토)", end:"2026.06.21 (일)", related:[{initials:"채수"},{initials:"최종"},{initials:"윤인"}], extra:3},
+  {type:"summer",color:"#3182CE", title:"여름휴가",   owner:"최한솔 대리", start:"2026.07.21 (화)", end:"2026.07.24 (금)", related:[{initials:"이기"},{initials:"고완"}], extra:1}
+];
+
 function renderSchedule(){
   const y=state.year, m=state.month;
+  if(!state.panelRelated) state.panelRelated=[];
+  if(!state.scheduleFilter) state.scheduleFilter="전체";
+
+  // 달력 셀 생성
   const first=new Date(y,m,1).getDay();
   const last=new Date(y,m+1,0).getDate();
-  const baseEvents = [
-    {day:6,type:"leave",text:`${state.user.name} 연차`},
-    {day:11,type:"trip",text:"업무 출장"},
-    {day:20,type:"half",text:`${state.user.name} 반차`},
-    {day:24,type:"summer",text:"여름휴가"}
+  const baseEvents=[
+    {day:12,type:"leave",text:"이수연 사원"},{day:18,type:"half",text:"김민준 팀장"},
+    {day:20,type:"trip",text:"이태리 사원"},{day:21,type:"summer",text:"여름휴가"}
   ];
-  const approvedEvents = state.userSchedules.filter(s=>s.status==="승인" && s.start).map(s=>{
+  const approvedEvents=state.userSchedules.filter(s=>s.status==="승인"&&s.start).map(s=>{
     const dt=new Date(s.start);
-    return {day:dt.getDate(), type:"schedule", text:s.title, full:s};
+    return {day:dt.getDate(),type:"schedule",text:s.title,full:s};
   });
-  const allEvents=[...baseEvents,...approvedEvents];
-  let cells = '';
-  for(let i=0;i<first;i++) cells += `<div class="month-cell empty"></div>`;
+  const allEvs=[...baseEvents,...approvedEvents];
   const today=new Date();
-  for(let d=1; d<=last; d++){
+  let cells='';
+  for(let i=0;i<first;i++) cells+=`<div class="ngrid-cell empty"></div>`;
+  for(let d=1;d<=last;d++){
     const isToday=y===today.getFullYear()&&m===today.getMonth()&&d===today.getDate();
-    const approvedList = state.userSchedules.filter(s=>s.status==="승인");
-    const ev=allEvents.filter(e=>e.day===d).map(e=>{
-      if(e.full){
-        const idx=approvedList.findIndex(x=>x===e.full);
-        return `<div class="month-event schedule schedule-clickable" onclick="showScheduleDetail(${idx})" style="cursor:pointer">${e.text}</div>`;
-      }
-      return `<div class="month-event ${e.type}">${e.text}</div>`;
-    }).join("");
-    cells += `<div class="month-cell ${isToday?'selected':''}"><b>${d}</b>${ev}</div>`;
+    const dots=allEvs.filter(e=>e.day===d).map(e=>`<i class="ldot ${e.type}"></i>`).join("");
+    cells+=`<div class="ngrid-cell${isToday?' is-today':''}"><span class="ngrid-num">${d}</span><div class="ngrid-dots">${dots}</div></div>`;
   }
 
-  // 사이드패널 업무 관련자 목록 (state.panelRelated에서 관리)
-  if(!state.panelRelated) state.panelRelated = [];
-  const panelPeople = state.panelRelated;
-  const approvedList = state.userSchedules.filter(s=>s.status==="승인");
+  // 일정 목록 필터
+  const filterMap={전체:null,연차:"leave",반차:"half",출장:"trip",여름휴가:"summer",기타:"schedule"};
+  const fType=filterMap[state.scheduleFilter];
+  const allItems=[...demoScheduleList,...state.userSchedules.filter(s=>s.status==="승인").map(s=>({type:"schedule",color:"#16A26A",title:s.title,owner:state.user.name+" "+state.user.title,start:s.start,end:s.end||s.start,related:[],extra:0}))];
+  const filtered=fType?allItems.filter(x=>x.type===fType):allItems;
 
-  const relatedHtml = panelPeople.length
-    ? panelPeople.map((p,i)=>`
-        <div class="panel-related-item">
-          <span><i class="lg schedule"></i>${p.name} <em>${p.title}</em></span>
-          <button class="panel-related-remove" onclick="removePanelRelated(${i})" title="삭제">×</button>
-        </div>`).join("")
-    : `<p class="panel-empty-hint">관련자 없음</p>`;
+  const filterTabs=["전체","연차","반차","출장","여름휴가","기타"].map(f=>
+    `<button class="sched-tab${state.scheduleFilter===f?' active':''}" onclick="setSchedFilter('${f}')">${f}</button>`
+  ).join("");
 
-  $("#content").innerHTML = `<div class="calendar-main card">
-    <div class="calendar-main-head">
-      <div><h3>일정관리</h3><p>부서/팀 일정 및 업무 관련자 일정을 함께 관리합니다.</p></div>
-      <button class="primary" onclick="openScheduleModal()">+ 내 일정 추가</button>
+  const listRows=filtered.map((it,i)=>{
+    const period=it.end&&it.end!==it.start?`${it.start} ~ ${it.end}`:it.start||"-";
+    const avatars=(it.related||[]).slice(0,2).map(r=>`<span class="sched-avatar">${r.initials||"●"}</span>`).join("");
+    const extraBadge=it.extra?`<span class="sched-extra">+${it.extra}</span>`:"";
+    return `<div class="sched-row">
+      <span class="sched-dot" style="background:${it.color||'#16A26A'}"></span>
+      <div class="sched-info">
+        <b>${it.title}</b>
+        <span>${it.owner||""}</span>
+      </div>
+      <div class="sched-period">${period}</div>
+      <div class="sched-avatars">${avatars}${extraBadge}</div>
+      <button class="sched-more" title="더보기">⋮</button>
+    </div>`;
+  }).join("")||`<div class="sched-empty">등록된 일정이 없습니다.</div>`;
+
+  // 관련자 입력 UI
+  const relatedPeople=state.panelRelated.map((p,i)=>`<span class="related-chip">${p.name} ${p.title}<button onclick="removePanelRelated(${i})">×</button></span>`).join("");
+
+  $("#content").innerHTML=`
+  <div class="nsched-wrap">
+    <!-- 내 일정 추가 폼 -->
+    <div class="card nsched-form-card">
+      <div class="nsched-form-title">내 일정 추가</div>
+      <div class="nsched-form-row">
+        <div class="nsched-field nsched-field-wide">
+          <label>일정명</label>
+          <input id="nsfTitle" placeholder="일정을 입력하세요">
+        </div>
+        <div class="nsched-field">
+          <label>시작일</label>
+          <div class="nsched-date-wrap"><input id="nsfStart" type="date" placeholder="날짜 선택"><span class="nsched-cal">📅</span></div>
+        </div>
+        <div class="nsched-field">
+          <label>종료일</label>
+          <div class="nsched-date-wrap"><input id="nsfEnd" type="date" placeholder="날짜 선택"><span class="nsched-cal">📅</span></div>
+        </div>
+      </div>
+      <div class="nsched-related-row">
+        <label>업무 관련자</label>
+        <div class="nsched-related-controls">
+          <button class="nsched-rel-btn" onclick="focusNsfSearch()">+ 추가</button>
+          <button class="nsched-rel-btn" onclick="focusNsfSearch()">+ 조직도</button>
+          <div class="nsched-rel-search-inline">
+            <input id="nsfRelInput" placeholder="이름 검색 (예: 김)" oninput="searchNsfRelated(this.value)" autocomplete="off">
+            <div id="nsfRelResults" class="nsched-rel-results hidden"></div>
+          </div>
+        </div>
+        <button class="primary nsched-save-btn" onclick="submitNsched()">저장</button>
+      </div>
+      <div id="nsfRelChips" class="nsched-rel-chips">${relatedPeople}</div>
     </div>
-    <div class="calendar-body-layout">
-      <aside class="calendar-team-panel">
-        <b>우리 팀 · ${state.user.team || state.user.dept}</b>
-        <div class="panel-me-row"><i class="lg leave"></i><span>${state.user.name} <em>${state.user.title}</em></span></div>
 
-        <div class="panel-related-section">
-          <div class="panel-related-head">
-            <b>업무 관련자</b>
-            <button class="panel-add-btn" onclick="togglePanelSearch()" id="panelAddBtn">+ 추가</button>
-          </div>
-          <div id="panelSearchBox" class="panel-search-box hidden">
-            <input id="panelSearchInput" placeholder="이름 검색 (예: 김)" autocomplete="off" oninput="searchPanelRelated(this.value)">
-            <div id="panelSearchResults" class="panel-search-results hidden"></div>
-          </div>
-          <div id="panelRelatedList">${relatedHtml}</div>
-        </div>
+    <!-- 일정 목록 -->
+    <div class="card nsched-list-card">
+      <div class="nsched-list-head">
+        <div class="nsched-tabs">${filterTabs}</div>
+        <select class="nsched-sort" onchange="">
+          <option>최신순</option><option>오래된순</option>
+        </select>
+      </div>
+      <div class="nsched-list">${listRows}</div>
+    </div>
 
-        <div class="panel-schedule-section">
-          <b>등록된 일정 (${approvedList.length}건)</b>
-          ${approvedList.length ? approvedList.slice(0,5).map((s,i)=>`<div class="schedule-mini-item" onclick="showScheduleDetail(${i})">${s.title}<span style="font-size:11px;color:#94a3b8;margin-left:4px">${s.start||''}</span></div>`).join("") : `<p class="panel-empty-hint">등록된 일정 없음</p>`}
-        </div>
-      </aside>
-      <section class="month-board">
-        <div class="month-board-head">
-          <h3>${y}년 ${m+1}월</h3>
-          <div class="month-legend">
-            <span><i class="lg leave"></i>연차</span>
-            <span><i class="lg half"></i>반차</span>
-            <span><i class="lg trip"></i>출장</span>
-            <span><i class="lg summer"></i>여름휴가</span>
-          </div>
-        </div>
-        <div class="month-week"><span>일</span><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span>토</span></div>
-        <div class="month-grid">${cells}</div>
-      </section>
+    <!-- 달력 -->
+    <div class="card nsched-cal-card">
+      <div class="nsched-cal-head">
+        <button onclick="prevSchedMonth()">‹</button>
+        <b>${y}년 ${m+1}월</b>
+        <button onclick="nextSchedMonth()">›</button>
+      </div>
+      <div class="nsched-week"><span>일</span><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span>토</span></div>
+      <div class="nsched-grid">${cells}</div>
+      <div class="nsched-legend">
+        <span><i class="ldot leave"></i>연차</span>
+        <span><i class="ldot half"></i>반차</span>
+        <span><i class="ldot trip"></i>출장</span>
+        <span><i class="ldot summer"></i>여름휴가</span>
+      </div>
     </div>
   </div>`;
+}
+
+function setSchedFilter(f){state.scheduleFilter=f;renderSchedule();}
+function prevSchedMonth(){state.month--;if(state.month<0){state.month=11;state.year--;}renderSchedule();}
+function nextSchedMonth(){state.month++;if(state.month>11){state.month=0;state.year++;}renderSchedule();}
+
+function focusNsfSearch(){
+  const inp=$("#nsfRelInput");
+  if(inp){ inp.focus(); inp.select(); }
+}
+function toggleNsfRelated(){focusNsfSearch();}
+function searchNsfRelated(q){
+  const box=$("#nsfRelResults");if(!box)return;
+  if(!q.trim()){box.classList.add("hidden");return;}
+  const results=employees.filter(e=>e.name.includes(q)&&e.name!==state.user.name&&!state.panelRelated.find(r=>r.name===e.name));
+  if(!results.length){box.innerHTML=`<div class="nsched-rel-item no-result">검색 결과 없음</div>`;box.classList.remove("hidden");return;}
+  box.innerHTML=results.map(e=>`<div class="nsched-rel-item" onclick="addNsfRelated('${e.name}','${e.title}','${e.dept}')">${e.name} <span>${e.title} · ${e.dept}</span></div>`).join("");
+  box.classList.remove("hidden");
+}
+function addNsfRelated(name,title,dept){
+  if(!state.panelRelated)state.panelRelated=[];
+  if(state.panelRelated.find(r=>r.name===name))return;
+  state.panelRelated.push({name,title,dept});
+  const chips=$("#nsfRelChips");
+  if(chips)chips.innerHTML=state.panelRelated.map((p,i)=>`<span class="related-chip">${p.name} ${p.title}<button onclick="removePanelRelated(${i})">×</button></span>`).join("");
+  const inp=$("#nsfRelInput");if(inp)inp.value="";
+  const res=$("#nsfRelResults");if(res)res.classList.add("hidden");
+  toast(`${name} 님을 업무 관련자로 추가했습니다.`);
+}
+function submitNsched(){
+  const title=$("#nsfTitle")?.value?.trim()||"";
+  const start=$("#nsfStart")?.value||"";
+  const end=$("#nsfEnd")?.value||"";
+  if(!title)return toast("일정명을 입력해 주세요.");
+  if(!start)return toast("시작일을 선택해 주세요.");
+  const related=state.panelRelated||[];
+  state.requests.unshift({id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),type:"schedule",title,user:state.user.name,date:new Date().toLocaleString("ko-KR"),status:"승인대기",done:false,fields:{title,start,end,related,dept:state.user.dept,team:state.user.team}});
+  saveRequests();updateRightbar();
+  state.panelRelated=[];
+  toast("일정이 등록되었습니다. 관리자 승인 후 반영됩니다.");
+  renderSchedule();
 }
 
 function togglePanelSearch(){
@@ -821,7 +901,11 @@ function openScheduleModal(){
     </div>
     <label>업무 관련자 추가</label>
     <div class="related-search-wrap">
-      <div class="related-search-box">
+      <div class="related-btn-row">
+        <button type="button" class="related-manual-btn" onclick="toggleRelatedSearch()">+ 추가</button>
+        <button type="button" class="related-org-btn" onclick="openRelatedOrg()">+ 조직도</button>
+      </div>
+      <div id="relatedSearchArea" class="related-search-box hidden">
         <input id="relatedSearchInput" placeholder="이름으로 검색 (예: 김)" autocomplete="off" oninput="searchRelated(this.value)">
       </div>
       <div id="relatedResults" class="related-results hidden"></div>
@@ -831,6 +915,21 @@ function openScheduleModal(){
     <textarea name="scheduleMemo" placeholder="일정 상세 내용"></textarea>
   `;
   $("#modal").classList.remove("hidden");
+}
+
+function toggleRelatedSearch(){
+  const area=$("#relatedSearchArea");
+  if(!area) return;
+  const hidden=area.classList.contains("hidden");
+  area.classList.toggle("hidden",!hidden);
+  if(hidden){ const inp=$("#relatedSearchInput"); if(inp) inp.focus(); }
+}
+function openRelatedOrg(){
+  // 조직도에서 선택: 간단히 검색박스를 열고 안내
+  const area=$("#relatedSearchArea");
+  if(area) area.classList.remove("hidden");
+  const inp=$("#relatedSearchInput");
+  if(inp){ inp.placeholder="조직도에서 이름 검색 (예: 이)"; inp.focus(); }
 }
 
 function searchRelated(q){
@@ -907,154 +1006,30 @@ function submitModal(){
   toast("제출되었습니다. 관리자 승인 후 반영됩니다.");
 }
 
-// 법정의무교육 데이터
-const legalEduData = {
-  courses: [
-    {id:"safety", name:"산업안전교육", total:15, completed:12, deadline:"2026-12-31"},
-    {id:"privacy", name:"개인정보보호교육", total:15, completed:14, deadline:"2026-09-30"},
-    {id:"harassment", name:"직장내괴롭힘예방교육", total:15, completed:10, deadline:"2026-11-30"},
-    {id:"sexual", name:"성희롱예방교육", total:15, completed:13, deadline:"2026-09-30"}
-  ],
-  incomplete: [
-    {name:"박서연", dept:"법무팀", courses:["직장내괴롭힘예방교육"]},
-    {name:"지한솔", dept:"공조영업팀", courses:["산업안전교육","직장내괴롭힘예방교육"]},
-    {name:"김한영", dept:"기술연구소", courses:["직장내괴롭힘예방교육","성희롱예방교육"]},
-    {name:"권순형", dept:"공조영업팀", courses:["산업안전교육"]},
-    {name:"오대양", dept:"공사2팀", courses:["개인정보보호교육","직장내괴롭힘예방교육"]}
-  ]
-};
-
-function renderLegalEdu(){
-  const role = state.user.role;
-  const isAdmin = role === "admin";
-  isAdmin ? renderLegalEduAdmin() : renderLegalEduUser();
-}
-
-// 직원용: 내 수료 현황만
-function renderLegalEduUser(){
-  const u = state.user;
-  const myIncomplete = legalEduData.incomplete.find(p=>p.name===u.name);
-  const today = new Date(); today.setHours(0,0,0,0);
-
-  function deadlineTag(deadlineStr, done){
-    const dl = new Date(deadlineStr); dl.setHours(0,0,0,0);
-    const diff = Math.ceil((dl - today) / (1000*60*60*24));
-    if(done) return `<span style="color:var(--sub);font-size:12px">${deadlineStr}</span>`;
-    if(diff < 0)  return `<span style="font-size:12px;font-weight:800;color:#B91C1C">${deadlineStr} <span style="background:#FEE2E2;color:#B91C1C;border-radius:6px;padding:1px 6px;font-size:11px">기한 초과</span></span>`;
-    if(diff <= 30) return `<span style="font-size:12px;font-weight:800;color:#B45309">${deadlineStr} <span style="background:#FFF3DA;color:#B45309;border-radius:6px;padding:1px 6px;font-size:11px">D-${diff}</span></span>`;
-    if(diff <= 90) return `<span style="font-size:12px;color:#1D4ED8">${deadlineStr} <span style="background:#EAF2FF;color:#1D4ED8;border-radius:6px;padding:1px 6px;font-size:11px">D-${diff}</span></span>`;
-    return `<span style="color:var(--sub);font-size:12px">${deadlineStr} <span style="color:#94a3b8;font-size:11px">D-${diff}</span></span>`;
-  }
-
-  const myRows = legalEduData.courses.map(c=>{
-    const done = myIncomplete ? !myIncomplete.courses.includes(c.name) : true;
-    return `<tr>
-      <td><b>${c.name}</b></td>
-      <td>${deadlineTag(c.deadline, done)}</td>
-      <td><span class="badge ${done?'':'red'}">${done?'수료완료':'미수료'}</span></td>
-    </tr>`;
-  }).join("");
-
-  const allDone = !myIncomplete;
-  const borderColor = allDone ? '#16A26A' : 'var(--red)';
-  const icon = allDone
-    ? `<div class="edu-status-icon edu-done">✓</div>`
-    : `<div class="edu-status-icon edu-warn">!</div>`;
-
-  $("#content").innerHTML = `
-    <div class="card edu-status-card" style="margin-bottom:16px;border:2px solid ${borderColor}">
-      <div style="display:flex;align-items:center;gap:16px">
-        ${icon}
-        <div>
-          <h3 style="margin-bottom:4px;color:${allDone?'#0F5132':'#B91C1C'}">${allDone?'모든 법정의무교육을 수료했습니다':'미수료 교육이 있습니다'}</h3>
-          <p style="font-size:13px;color:var(--sub)">${allDone?'올해 법정의무교육을 모두 완료했습니다. 수고하셨습니다 😊':'아래 미수료 항목을 확인하고 인사담당자에게 문의하세요.'}</p>
-        </div>
-      </div>
-    </div>
-    <div class="card">
-      <h3 style="margin-bottom:14px">내 법정의무교육 현황</h3>
-      <table class="table">
-        <thead><tr><th>교육명</th><th>이수 기한</th><th>수료 여부</th></tr></thead>
-        <tbody>${myRows}</tbody>
-      </table>
-      <p style="margin-top:14px;font-size:12px;color:var(--sub)">※ 수료 이력은 인사담당자가 확인 후 반영합니다. 문의: 이태리 사원</p>
-    </div>`;
-}
-
-// 관리자/팀장/대표이사용: 전체 현황
-function renderLegalEduAdmin(){
-  const {courses, incomplete} = legalEduData;
-  const totalEmp = 15;
-  const allCompleted = courses.reduce((s,c)=>s+c.completed,0);
-  const allTotal = courses.reduce((s,c)=>s+c.total,0);
-  const overallRate = Math.round(allCompleted/allTotal*100);
-  const incompleteCount = incomplete.length;
-  const todayCount = 2;
-
-  const courseRows = courses.map(c=>{
-    const rate=Math.round(c.completed/c.total*100);
-    const barColor = rate>=80?"var(--green)":rate>=50?"var(--orange)":"var(--red)";
-    return `<tr>
-      <td><b>${c.name}</b></td>
-      <td>${c.completed}/${c.total}명</td>
-      <td>
-        <div style="display:flex;align-items:center;gap:8px">
-          <div style="flex:1;height:8px;background:#EDF2F7;border-radius:99px;overflow:hidden">
-            <div style="width:${rate}%;height:100%;background:${barColor};border-radius:99px"></div>
-          </div>
-          <span style="font-weight:900;color:${barColor};width:38px;text-align:right">${rate}%</span>
-        </div>
-      </td>
-      <td><span class="badge ${rate===100?'':'orange'}">${rate===100?'완료':'진행중'}</span></td>
-      <td style="color:var(--sub);font-size:12px">${c.deadline}</td>
-    </tr>`;
-  }).join("");
-
-  const incompleteRows = incomplete.map(p=>`<tr>
-    <td>${p.name}</td>
-    <td>${p.dept}</td>
-    <td>${p.courses.map(c=>`<span class="badge red" style="margin-right:4px">${c}</span>`).join("")}</td>
-  </tr>`).join("");
-
-  $("#content").innerHTML = `
-    <div class="kpi" style="grid-template-columns:repeat(3,1fr)">
-      <div class="card"><span>전체 수료율</span><strong style="color:var(--green)">${overallRate}<em>%</em></strong><p>${allCompleted}/${allTotal}건 완료</p><div class="bar"><i style="width:${overallRate}%"></i></div></div>
-      <div class="card"><span>미수료자 수</span><strong style="color:var(--red)">${incompleteCount}<em>명</em></strong><p>재안내 필요</p><div class="bar orange"><i style="width:${Math.round(incompleteCount/totalEmp*100)}%"></i></div></div>
-      <div class="card"><span>오늘 수료자</span><strong style="color:var(--blue)">${todayCount}<em>명</em></strong><p>오늘 신규 수료</p><div class="bar"><i style="background:var(--blue);width:${Math.round(todayCount/totalEmp*100)}%"></i></div></div>
-    </div>
-    <div class="card" style="margin-bottom:16px">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
-        <h3>교육별 수료 현황</h3>
-      </div>
-      <table class="table">
-        <thead><tr><th>교육명</th><th>수료 인원</th><th>수료율</th><th>상태</th><th>이수 기한</th></tr></thead>
-        <tbody>${courseRows}</tbody>
-      </table>
-    </div>
-    <div class="card">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
-        <h3>미수료자 현황 <span class="badge red" style="margin-left:8px">${incompleteCount}명</span></h3>
-        <div style="display:flex;gap:10px">
-          <button class="ghost" onclick="toast('미수료자 ${incompleteCount}명에게 재안내 메일이 발송되었습니다.')">📧 미수료자 재안내</button>
-          <button class="primary" onclick="toast('엑셀 다운로드가 완료되었습니다.')">⬇ 엑셀 다운로드</button>
-        </div>
-      </div>
-      <table class="table">
-        <thead><tr><th>이름</th><th>부서</th><th>미수료 교육</th></tr></thead>
-        <tbody>${incompleteRows}</tbody>
-      </table>
-    </div>`;
-}
-
 function renderOrg(){
-  $("#content").innerHTML = `<div class="toolbar"><input id="orgSearch" placeholder="이름, 부서, 사번 검색" oninput="filterOrg()"><select id="orgDept" onchange="filterOrg()"><option value="">전체 부서</option>${[...new Set(employees.map(e=>e.dept))].map(d=>`<option>${d}</option>`).join("")}</select></div><div id="orgTable"></div>
-  <div class="card" style="margin-top:16px"><h3>조직도 업로드 반영</h3><p>업로드한 2026년 6월 조직도 기준으로 공조사업부/공조영업팀 주요 인원 데이터를 반영했습니다. 운영 시에는 그룹웨어 조직도 API와 연동하여 자동 업데이트하는 구조로 확장 가능합니다.</p></div>`;
+  const allEmps=[...employees,...orgUploadedEmployees];
+  $("#content").innerHTML = `
+  <div class="org-search-bar">
+    <input id="orgSearch" placeholder="이름, 부서, 사번 검색" oninput="filterOrg()">
+    <select id="orgDept" onchange="filterOrg()">
+      <option value="">전체 부서</option>
+      ${[...new Set(allEmps.map(e=>e.dept))].map(d=>`<option>${d}</option>`).join("")}
+    </select>
+  </div>
+  <div class="card org-table-card">
+    <div id="orgTable"></div>
+  </div>
+  <div class="card" style="margin-top:16px">
+    <h3>조직도 업로드 반영</h3>
+    <p>업로드한 2026년 6월 조직도 기준으로 공조사업부/공조영업팀 주요 인원 데이터를 반영했습니다. 운영 시에는 그룹웨어 조직도 API와 연동하여 자동 업데이트하는 구조로 확장 가능합니다.</p>
+  </div>`;
   filterOrg();
 }
 
 function filterOrg(){
   const q=($("#orgSearch")?.value||"").toLowerCase(), d=$("#orgDept")?.value||"";
-  const rows=employees.filter(e=>(!d||e.dept===d) && [e.name,e.dept,e.team,e.employeeId,e.title].join(" ").toLowerCase().includes(q));
+  const allEmps=[...employees,...orgUploadedEmployees];
+  const rows=allEmps.filter(e=>(!d||e.dept===d) && [e.name,e.dept,e.team,e.employeeId,e.title].join(" ").toLowerCase().includes(q));
   $("#orgTable").innerHTML=tableHtml([["사번","이름","직급","부서/팀","연락처","이메일"],...rows.map(e=>[e.employeeId,e.name,e.title,`${e.dept} · ${e.team}`,e.phone,e.email])]);
 }
 
@@ -1120,8 +1095,6 @@ function toast(msg){ const t=$("#toast"); t.textContent=msg; t.classList.add("sh
 
 
 /* ===== 체리 최종 수정 v10: 업로드 아이콘/프로필 드롭다운/홈/조직도/일정관리 ===== */
-const orgUploadedEmployees = [{"employeeId": "ORG0001", "name": "이경민", "title": "계약직", "dept": "공사1팀", "team": "공사1팀", "phone": "-", "email": "-"}, {"employeeId": "ORG0002", "name": "김민서", "title": "계약직", "dept": "공사1팀", "team": "공사1팀", "phone": "-", "email": "-"}, {"employeeId": "ORG0003", "name": "진성욱", "title": "계약직", "dept": "공사1팀", "team": "공사1팀", "phone": "-", "email": "-"}, {"employeeId": "ORG0004", "name": "오대양", "title": "계약직", "dept": "공사2팀", "team": "공사2팀", "phone": "-", "email": "-"}, {"employeeId": "ORG0005", "name": "황남열", "title": "4급", "dept": "CS팀", "team": "CS팀", "phone": "-", "email": "-"}];
-
 function login(){
   const id=$("#loginId").value.trim(), pw=$("#loginPw").value;
   const user=state.users.find(u=>(u.id===id || u.employeeId===id) && u.pw===pw);
